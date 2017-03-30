@@ -2,13 +2,14 @@ package com.company;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 /**
  * Created by shayanraouf on 3/28/2017.
  */
-public class Lexer {
+class Lexer {
     private Scanner scanner;
     private Token token;
     private Map<String, Token> map;
@@ -33,8 +34,35 @@ public class Lexer {
 
         return token;
     }
+    
+
 
     public void initializeMap(){
+        map = new HashMap<>();
+
+        //Adding all the operators
+        map.put("!", new Operator("!"));
+        map.put("!=", new Operator("!="));
+        map.put("+", new Operator("+"));
+        map.put("-", new Operator("-"));
+
+
+        map.put("*", new Operator("*"));
+        map.put("/", new Operator("/"));
+
+        map.put("&", new Operator("&"));
+        map.put("|", new Operator("|"));
+        map.put("~", new Operator("~"));
+
+        map.put(">", new Operator(">"));
+        map.put("<", new Operator("<"));
+        map.put(">=", new Operator(">="));
+        map.put("<=", new Operator("<="));
+
+        map.put("this", new Keyword("this"));
+        map.put("if", new Keyword("if"));
+        map.put("else", new Keyword("else"));
+        map.put("null", new Keyword("null"));
 
     }
 
@@ -42,12 +70,10 @@ public class Lexer {
 
 }
 
-interface Token{
-
-}
 
 
-class Keyword {
+
+class Keyword implements Token{
     private String keyword;
 
     public Keyword(String s){
@@ -60,7 +86,7 @@ class Keyword {
     }
 }
 
-class Operator{
+class Operator implements Token{
     private String operator;
     public Operator(String s){
         operator = s;
