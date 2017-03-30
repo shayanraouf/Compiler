@@ -2,39 +2,77 @@ package com.company;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Created by shayanraouf on 3/28/2017.
  */
-public class Lexer {
-    private Scanner scanner;
-    private Token token;
-    private Map<String, Token> map;
+class Lexer {
 
-    public Lexer(String filename){
-        try{
-            scanner = new Scanner(new File(filename));
-        }
-        catch (FileNotFoundException e){
-            System.err.println("File Not Found " + e);
-            System.exit(-1);
-        }
+    public static void main(String[] args){
+        Variable a = new Variable("foo");
+        Variable b = new Variable("foo");
+        System.out.println(a.hash());
+        System.out.println(b.hash());
+        System.out.println(a.hashCode());
+        System.out.println(b.hashCode());
     }
 
-    public Lexer(Scanner inputScanner){
-        scanner = inputScanner;
+    private String input;
+    private List<Token> tokens;
+    private Map<String, Token> reservedKeyWords;
+    private Map<Integer,String> symbolTable;
+
+    public Lexer(String input){
+        this.input = input;
     }
+
 
     public Token run(){
 
+        int k = 10;
+        for(int i = 0; i < input.length(); i++){
+            char ch = input.charAt(i);
+            System.out.print(ch);
+            if(i % 20 == 0){
+                System.out.print("\n");
+            }
+        }
 
-
-        return token;
+        return null;
     }
+
+
 
     public void initializeMap(){
+        reservedKeyWords = new HashMap<>();
+        symbolTable = new HashMap<>();
+        tokens = new ArrayList<>();
+
+        //Adding all the operators
+        reservedKeyWords.put("!", new Operator("!"));
+        reservedKeyWords.put("!=", new Operator("!="));
+        reservedKeyWords.put("+", new Operator("+"));
+        reservedKeyWords.put("-", new Operator("-"));
+
+
+        reservedKeyWords.put("*", new Operator("*"));
+        reservedKeyWords.put("/", new Operator("/"));
+
+        reservedKeyWords.put("&", new Operator("&"));
+        reservedKeyWords.put("|", new Operator("|"));
+        reservedKeyWords.put("~", new Operator("~"));
+
+        reservedKeyWords.put(">", new Operator(">"));
+        reservedKeyWords.put("<", new Operator("<"));
+        reservedKeyWords.put(">=", new Operator(">="));
+        reservedKeyWords.put("<=", new Operator("<="));
+
+        reservedKeyWords.put("for", new Keyword("for"));
+        reservedKeyWords.put("this", new Keyword("this"));
+        reservedKeyWords.put("if", new Keyword("if"));
+        reservedKeyWords.put("else", new Keyword("else"));
+        reservedKeyWords.put("null", new Keyword("null"));
 
     }
 
@@ -42,12 +80,10 @@ public class Lexer {
 
 }
 
-interface Token{
-
-}
 
 
-class Keyword {
+
+class Keyword implements Token{
     private String keyword;
 
     public Keyword(String s){
@@ -60,7 +96,7 @@ class Keyword {
     }
 }
 
-class Operator{
+class Operator implements Token{
     private String operator;
     public Operator(String s){
         operator = s;
@@ -80,6 +116,10 @@ class Variable implements Token{
     @Override
     public String toString(){
         return var;
+    }
+
+    public int hash(){
+        return Math.abs(var.hashCode());
     }
 
 }
