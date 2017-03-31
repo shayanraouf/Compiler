@@ -22,25 +22,116 @@ class Lexer {
     private List<Token> tokens;
     private Map<String, Token> reservedKeyWords;
     private Map<Integer,String> symbolTable;
+    char[] ASCII = {'(', ')','[',']'};
+
 
     public Lexer(String input){
         this.input = input;
     }
 
+    public void print(){
+       for(Token t: tokens){
+           System.out.println(t);
+       }
+    }
 
-    public Token run(){
 
-        int k = 10;
-        for(int i = 0; i < input.length(); i++){
-            char ch = input.charAt(i);
-            System.out.print(ch);
-            if(i % 20 == 0){
-                System.out.print("\n");
+    public void run(){
+        tokens = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        int row = 1;
+        int col = 1;
+        for(int i = 1; i < input.length(); i++){ // for loop
+            col++;
+            char current = input.charAt(i);
+            char lookAHead = input.charAt(i);
+            
+            if(isLetter(current)){
+                // TODO: 3/30/2017  
+                continue;
             }
+            
+            if(isDigit(current)){
+                // TODO: 3/30/2017  
+                continue;
+            }
+            
+            
+            switch (current){
+
+                case '(':
+                    tokens.add(new Operator("(",row,col));
+                    break;
+                case ')':
+                    tokens.add(new Operator(")",row, col));
+                    break;
+                case ' ':
+                    continue;
+
+                case '\n':
+                    col = 1;
+                    row++;
+                    continue;
+                case '[':
+                case ']':
+                case '{':
+                case '}':
+                case ',':
+                case ';':
+
+                case '+':
+                case '-':
+                case '*':
+                case '/':
+                case '~':
+                case '=':
+                case '>':
+                    // TODO: 3/30/2017
+                    // case for >=
+
+                case '<':
+                    // TODO: 3/30/2017
+                    // case for <=
+
+                case '!':
+                    // TODO: 3/30/2017
+                    // case for !=
+                case '&':
+                    // TODO: 3/30/2017
+                case '|':
+                    // TODO: 3/30/2017
+
+                 // TODO: 3/30/2017
+                 // case letter
+
+                // TODO: 3/30/2017
+                // case letter
+
+
+                 default:
+                     break;
+                     // TODO: 3/30/2017
+                     // handle error
+
+            }
+
         }
 
-        return null;
+
     }
+
+    private void clearStringBuilder(StringBuilder sb){
+        sb.setLength(0);
+    }
+
+    private boolean isLetter(char c){
+        return false;
+    }
+
+    private boolean isDigit(char c){
+        return false;
+    }
+
 
 
 
@@ -98,13 +189,22 @@ class Keyword implements Token{
 
 class Operator implements Token{
     private String operator;
+    private int row;
+    private int col;
+    public Operator(String s, int r, int c){
+        operator = s;
+        row = r;
+        col = c;
+    }
+
     public Operator(String s){
         operator = s;
     }
 
+
     @Override
     public String toString(){
-        return operator;
+        return "[" + row + "," + col + "]" + " " + operator;
     }
 }
 
