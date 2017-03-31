@@ -15,6 +15,7 @@ public class Main {
     public static void run(String in){
 
         Lexer lexer = new Lexer(FileToString(in));
+
         Iterator<Token> it = lexer.iterator();
         while(it.hasNext()){
             System.out.println(it.next());

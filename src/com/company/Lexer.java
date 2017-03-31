@@ -11,7 +11,6 @@ class Lexer implements Iterable<Token>{
     private List<Token> tokens;
     private Set<String> reservedKeyWords;
     private Map<Integer,String> symbolTable;
-    char[] ASCII = {'(', ')','[',']'};
 
 
     public Lexer(String input){
@@ -49,12 +48,22 @@ class Lexer implements Iterable<Token>{
         initializeMap();
         StringBuilder sb = new StringBuilder();
         int row = 1;
-        int col = 1;
-        for(int i = 1; i < input.length(); i++){ // for loop
+        int col = 0;
+
+
+        boolean lookAHead = true;
+
+        for(int i = 0; i < input.length(); i++){ // for loop
             col++;
+
+
             char current = input.charAt(i);
-            char lookAHead = input.charAt(i);
-            
+
+            if(i + 1 >= input.length()){
+                lookAHead = false;
+            }
+
+
             if(isLetter(current)){
                 // TODO: 3/30/2017  
                 continue;
@@ -68,32 +77,41 @@ class Lexer implements Iterable<Token>{
             
             switch (current){
 
-                case '(':
-                    tokens.add(new Operator("(",row,col));
-                    break;
-                case ')':
-                    tokens.add(new Operator(")",row, col));
-                    break;
-                case ' ':
-                    continue;
+                case '(': tokens.add(new Operator("(",row,col));
+                          break;
+                case ')': tokens.add(new Operator(")",row,col));
+                          break;
+                case ' ': col--;
+                          break;
+                case '\n': col = 0;
+                           row++;
+                           break;
+                case '[': tokens.add(new Operator("[",row,col));
+                          break;
+                case ']': tokens.add(new Operator("]",row,col));
+                          break;
+                case '{': tokens.add(new Operator("{",row,col));
+                          break;
+                case '}': tokens.add(new Operator("}",row,col));
+                          break;
+                case ',': tokens.add(new Operator(",",row,col));
+                          break;
+                case ';': tokens.add(new Operator(";",row,col));
+                          break;
 
-                case '\n':
-                    col = 1;
-                    row++;
-                    continue;
-                case '[':
-                case ']':
-                case '{':
-                case '}':
-                case ',':
-                case ';':
-
-                case '+':
-                case '-':
-                case '*':
-                case '/':
-                case '~':
-                case '=':
+                case '+': tokens.add(new Operator("+",row,col));
+                          break;
+                case '-': tokens.add(new Operator("-",row,col));
+                          break;
+                case '*': tokens.add(new Operator("*",row,col));
+                          break;
+                case '/': tokens.add(new Operator("/",row,col));
+                          break;
+                case '~': tokens.add(new Operator("~",row,col));
+                          break;
+                case '=': tokens.add(new Operator("=",row,col));
+                          break;
+                case '^': tokens.add(new Operator("^",row,col));
                 case '>':
                     // TODO: 3/30/2017
                     // case for >=
@@ -106,16 +124,38 @@ class Lexer implements Iterable<Token>{
                     // TODO: 3/30/2017
                     // case for !=
                 case '&':
-                    // TODO: 3/30/2017
+                    if(lookAHead){
+                        char next = input.charAt(i + 1);
+                        if(next == '&'){
+                            tokens.add(new Operator("&&",row,col));
+                            i++;
+                        }
+                        else{
+                            tokens.add(new Operator("&",row,col));
+                        }
+                    }
+                    else{
+                        tokens.add(new Operator("&",row,col));
+
+                    }
+                    break;
                 case '|':
-                    // TODO: 3/30/2017
 
-                 // TODO: 3/30/2017
-                 // case letter
+                    if(lookAHead){
+                        char next = input.charAt(i + 1);
+                        if(next == '|'){
+                            tokens.add(new Operator("||",row,col));
+                            i++;
+                        }
+                        else{
+                            tokens.add(new Operator("|",row,col));
+                        }
+                    }
+                    else{
+                        tokens.add(new Operator("|",row,col));
 
-                // TODO: 3/30/2017
-                // case letter
-
+                    }
+                    break;
 
                  default:
                      break;
