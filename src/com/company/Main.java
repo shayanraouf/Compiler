@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args){
-
+        double a = 3e15;
         new Main().run(args[0]);
 
     }
@@ -15,6 +15,7 @@ public class Main {
 
         Lexer lexer = new Lexer(FileToString(in));
         lexer.run();
+        lexer.print();
     }
 
     public static String FileToString(String input){
