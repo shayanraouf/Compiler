@@ -1,43 +1,52 @@
 package com.company;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.*;
 
 /**
  * Created by shayanraouf on 3/28/2017.
  */
-class Lexer {
-
-    public static void main(String[] args){
-        Variable a = new Variable("foo");
-        Variable b = new Variable("foo");
-        System.out.println(a.hash());
-        System.out.println(b.hash());
-        System.out.println(a.hashCode());
-        System.out.println(b.hashCode());
-    }
+class Lexer implements Iterable<Token>{
 
     private String input;
     private List<Token> tokens;
-    private Map<String, Token> reservedKeyWords;
+    private Set<String> reservedKeyWords;
     private Map<Integer,String> symbolTable;
     char[] ASCII = {'(', ')','[',']'};
 
 
     public Lexer(String input){
         this.input = input;
-    }
-
-    public void print(){
-       for(Token t: tokens){
-           System.out.println(t);
-       }
+        tokenize();
     }
 
 
-    public void run(){
-        tokens = new ArrayList<>();
+    @Override
+    public Iterator<Token> iterator(){
+        Iterator<Token> it = new Iterator<Token>(){
+            private int elementIndex = 0;
+
+            @Override
+            public boolean hasNext() {
+                return elementIndex < tokens.size();
+            }
+
+            @Override
+            public Token next() {
+                return tokens.get(elementIndex++);
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+        return it;
+    }
+
+
+
+    private void tokenize(){
+        initializeMap();
         StringBuilder sb = new StringBuilder();
         int row = 1;
         int col = 1;
@@ -136,164 +145,135 @@ class Lexer {
 
 
     public void initializeMap(){
-        reservedKeyWords = new HashMap<>();
+        reservedKeyWords = new HashSet<>();
         symbolTable = new HashMap<>();
         tokens = new ArrayList<>();
 
         //Adding all the operators
-        reservedKeyWords.put("!", new Operator("!"));
-        reservedKeyWords.put("!=", new Operator("!="));
-        reservedKeyWords.put("+", new Operator("+"));
-        reservedKeyWords.put("-", new Operator("-"));
+        reservedKeyWords.add("!");
+        reservedKeyWords.add("!=");
+        reservedKeyWords.add("+");
+        reservedKeyWords.add("-");
 
 
-        reservedKeyWords.put("*", new Operator("*"));
-        reservedKeyWords.put("/", new Operator("/"));
+        reservedKeyWords.add("*");
+        reservedKeyWords.add("/");
 
-        reservedKeyWords.put("&", new Operator("&"));
-        reservedKeyWords.put("|", new Operator("|"));
-        reservedKeyWords.put("~", new Operator("~"));
+        reservedKeyWords.add("&");
+        reservedKeyWords.add("|");
+        reservedKeyWords.add("~");
 
-        reservedKeyWords.put(">", new Operator(">"));
-        reservedKeyWords.put("<", new Operator("<"));
-        reservedKeyWords.put(">=", new Operator(">="));
-        reservedKeyWords.put("<=", new Operator("<="));
+        reservedKeyWords.add(">");
+        reservedKeyWords.add("<");
+        reservedKeyWords.add(">=");
+        reservedKeyWords.add("<=");
 
-        reservedKeyWords.put("for", new Keyword("for"));
-        reservedKeyWords.put("this", new Keyword("this"));
-        reservedKeyWords.put("if", new Keyword("if"));
-        reservedKeyWords.put("else", new Keyword("else"));
-        reservedKeyWords.put("null", new Keyword("null"));
+        reservedKeyWords.add("for");
+        reservedKeyWords.add("this");
+        reservedKeyWords.add("if");
+        reservedKeyWords.add("else");
+        reservedKeyWords.add("null");
 
     }
-
-
 
 }
 
 
 
 
-class Keyword implements Token{
-    private String keyword;
+class Keyword extends Token{
 
-    public Keyword(String s){
-        keyword = s;
+    public Keyword(String s, int r, int c){
+        super(s,r,c);
     }
 
-    @Override
-    public String toString(){
-        return keyword;
-    }
 }
 
-class Operator implements Token{
-    private String operator;
-    private int row;
-    private int col;
+class Operator extends Token{
+
     public Operator(String s, int r, int c){
-        operator = s;
-        row = r;
-        col = c;
-    }
+        super(s,r,c);
 
-    public Operator(String s){
-        operator = s;
     }
-
 
     @Override
     public String toString(){
-        return "[" + row + "," + col + "]" + " " + operator;
+        return super.toString() + " " + TokenName.names.get(super.text);
     }
+
+    
 }
 
-class Variable implements Token{
-    private String var;
-    public Variable(String v){
-        var = v;
+class Identifier extends Token{
+    public Identifier(String s,int r, int c){
+        super(s,r,c);
     }
-    @Override
-    public String toString(){
-        return var;
-    }
+
 
     public int hash(){
-        return Math.abs(var.hashCode());
+        return Math.abs(super.text.hashCode());
     }
 
 }
 
-class Comma implements Token{
-    @Override
-    public String toString(){
-        return ",";
+class Comma extends Token{
+    
+    public Comma(String s, int r, int c){
+        super(s,r,c);
     }
-    public Comma(){}
+    
 }
 
 
 
-class SemiColon implements Token{
-    @Override
-    public String toString(){
-        return ";";
-    }
-    public SemiColon(){}
-}
+class SemiColon extends Token{
 
-
-class LeftParanthesis implements Token{
-    @Override
-    public String toString(){
-        return "(";
-    }
-    public LeftParanthesis(){}
-}
-
-class RightParanthesis implements Token{
-
-    @Override
-    public String toString(){
-        return ")";
-    }
-    public RightParanthesis() {
+    public SemiColon(String s, int r, int c){
+        super(s,r,c);
     }
 }
 
-class LeftBracket implements Token{
 
-    @Override
-    public String toString(){
-        return "[";
-    }
-    public LeftBracket(){}
-}
-
-class RightBracket implements Token{
-
-    @Override
-    public String toString(){
-        return "]";
-    }
-    public RightBracket(){}
-}
-
-
-class LeftBrace implements Token{
-    @Override
-    public String toString(){
-        return "{";
+class LeftParanthesis extends Token{
+    public LeftParanthesis(String s, int r, int c){
+        super(s,r,c);
     }
 
-    public LeftBrace(){}
 }
 
-class RightBrace implements Token{
+class RightParanthesis extends Token{
 
-    @Override
-    public String toString(){
-        return "}";
+    public RightParanthesis(String s, int r, int c) {
+        super(s,r,c);
     }
-    public RightBrace(){}
 }
+
+class LeftBracket extends Token{
+
+    public LeftBracket(String s, int r, int c){
+        super(s,r,c);
+    }
+}
+
+class RightBracket extends Token{
+    
+    public RightBracket(String s, int r, int c){
+        super(s,r,c);
+    }
+}
+
+
+class LeftBrace extends Token{
+
+    public LeftBrace(String s, int r, int c){
+        super(s,r,c);
+    }
+}
+
+class RightBrace extends Token{
+    
+    public RightBrace(String s, int r, int c){
+        super(s,r,c);
+    }
+}
+
