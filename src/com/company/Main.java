@@ -3,6 +3,7 @@ package com.company;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Scanner;
 
 public class Main {
@@ -14,8 +15,10 @@ public class Main {
     public static void run(String in){
 
         Lexer lexer = new Lexer(FileToString(in));
-        lexer.run();
-        lexer.print();
+        Iterator<Token> it = lexer.iterator();
+        while(it.hasNext()){
+            System.out.println(it.next());
+        }
     }
 
     public static String FileToString(String input){
