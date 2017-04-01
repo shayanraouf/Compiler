@@ -1,5 +1,6 @@
 package com.company;
 
+import java.security.Key;
 import java.util.*;
 
 /**
@@ -11,7 +12,6 @@ class Lexer implements Iterable<Token>{
     private List<Token> tokens;
     private Set<String> reservedKeyWords;
     private Map<Integer,String> symbolTable;
-    char[] ASCII = {'(', ')','[',']'};
 
 
     public Lexer(String input){
@@ -48,52 +48,74 @@ class Lexer implements Iterable<Token>{
     private void tokenize(){
         initializeMap();
         StringBuilder sb = new StringBuilder();
+        StringBuilder sb_digit = new StringBuilder();
         int row = 1;
-        int col = 1;
-        for(int i = 1; i < input.length(); i++){ // for loop
+        int col = 0;
+
+
+        boolean lookAHead = true;
+
+        for(int i = 0; i < input.length(); i++){ // for loop
             col++;
             char current = input.charAt(i);
-            char lookAHead = input.charAt(i);
-            
+            if(i + 1 >= input.length()) lookAHead = false;
+
+
             if(isLetter(current)){
-                // TODO: 3/30/2017  
+                letterTokenizer(current,lookAHead,i,row,col,sb);
                 continue;
             }
             
             if(isDigit(current)){
-                // TODO: 3/30/2017  
+
+                if(sb.length() != 0){                                            // digit is a part of an identifier
+                    letterTokenizer(current,lookAHead,i,row,col,sb);
+                }
+                else{                                                            // digit is a number
+                    digitTokenizer(current,lookAHead,i,row,col,sb_digit);
+                }
+
                 continue;
             }
-            
-            
+
+
             switch (current){
 
-                case '(':
-                    tokens.add(new Operator("(",row,col));
-                    break;
-                case ')':
-                    tokens.add(new Operator(")",row, col));
-                    break;
-                case ' ':
-                    continue;
+                case '(': tokens.add(new Operator("(",row,col));
+                          break;
+                case ')': tokens.add(new Operator(")",row,col));
+                          break;
+                case ' ': col--;
+                          break;
+                case '\n': col = 0;
+                           row++;
+                           break;
+                case '[': tokens.add(new Operator("[",row,col));
+                          break;
+                case ']': tokens.add(new Operator("]",row,col));
+                          break;
+                case '{': tokens.add(new Operator("{",row,col));
+                          break;
+                case '}': tokens.add(new Operator("}",row,col));
+                          break;
+                case ',': tokens.add(new Operator(",",row,col));
+                          break;
+                case ';': tokens.add(new Operator(";",row,col));
+                          break;
 
-                case '\n':
-                    col = 1;
-                    row++;
-                    continue;
-                case '[':
-                case ']':
-                case '{':
-                case '}':
-                case ',':
-                case ';':
-
-                case '+':
-                case '-':
-                case '*':
-                case '/':
-                case '~':
-                case '=':
+                case '+': tokens.add(new Operator("+",row,col));
+                          break;
+                case '-': tokens.add(new Operator("-",row,col));
+                          break;
+                case '*': tokens.add(new Operator("*",row,col));
+                          break;
+                case '/': tokens.add(new Operator("/",row,col));
+                          break;
+                case '~': tokens.add(new Operator("~",row,col));
+                          break;
+                case '=': tokens.add(new Operator("=",row,col));
+                          break;
+                case '^': tokens.add(new Operator("^",row,col));
                 case '>':
                     // TODO: 3/30/2017
                     // case for >=
@@ -106,17 +128,36 @@ class Lexer implements Iterable<Token>{
                     // TODO: 3/30/2017
                     // case for !=
                 case '&':
-                    // TODO: 3/30/2017
+                    if(lookAHead){
+                        char next = input.charAt(i + 1);
+                        if(next == '&'){
+                            tokens.add(new Operator("&&",row,col));
+                            i++;
+                        }
+                        else{
+                            tokens.add(new Operator("&",row,col));
+                        }
+                    }
+                    else{
+                        tokens.add(new Operator("&",row,col));
+
+                    }
+                    break;
                 case '|':
-                    // TODO: 3/30/2017
-
-                 // TODO: 3/30/2017
-                 // case letter
-
-                // TODO: 3/30/2017
-                // case letter
-
-
+                    if(lookAHead){
+                        char next = input.charAt(i + 1);
+                        if(next == '|'){
+                            tokens.add(new Operator("||",row,col));
+                            i++;
+                        }
+                        else{
+                            tokens.add(new Operator("|",row,col));
+                        }
+                    }
+                    else{
+                        tokens.add(new Operator("|",row,col));
+                    }
+                    break;
                  default:
                      break;
                      // TODO: 3/30/2017
@@ -125,8 +166,61 @@ class Lexer implements Iterable<Token>{
             }
 
         }
+    }
+
+    private void letterTokenizer(char current, boolean lookAHead,int i, int row, int col, StringBuilder sb){
+        sb.append(current);
+        if(lookAHead){
+
+            char nextChar = input.charAt(i + 1);            // if next char is a letter
+            if(!isLetter(nextChar) && !isDigit(nextChar)){
+
+                String word = sb.toString();
+                if(reservedKeyWords.contains(word)){        // keyword
+                    tokens.add(new Keyword(word,row,col));
+                }
+                else{                                       // identifier
+                    tokens.add(new Identifier(word,row,col));
+                }
+
+                clearStringBuilder(sb);                     // reset the string builder to empty
+            }
+
+        }
+        else{
+            // at the very last character
+            String word = sb.toString();
+            if(reservedKeyWords.contains(word)){            // keyword
+                tokens.add(new Keyword(word,row,col));
+            }
+            else{                                           // identifier
+                tokens.add(new Identifier(word,row,col));
+            }
+            clearStringBuilder(sb);                     // reset the string builder to empty
+        }
+
+    }
 
 
+    private void digitTokenizer(char current, boolean lookAHead,int i, int row, int col, StringBuilder sb){
+
+        sb.append(current);
+        if(lookAHead){
+            char next = input.charAt(i + 1);
+            if(!isDigit(next)){
+                String number = sb.toString();
+                tokens.add(new Number(number,row,col));
+
+                clearStringBuilder(sb);                     // reset the string builder to empty
+            }
+        }
+        else{
+            String number = sb.toString();
+            tokens.add(new Number(number,row,col));
+
+            clearStringBuilder(sb);                     // reset the string builder to empty
+
+        }
     }
 
     private void clearStringBuilder(StringBuilder sb){
@@ -134,11 +228,11 @@ class Lexer implements Iterable<Token>{
     }
 
     private boolean isLetter(char c){
-        return false;
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
     }
 
     private boolean isDigit(char c){
-        return false;
+        return (c >= '0' && c <= '9');
     }
 
 
@@ -179,12 +273,30 @@ class Lexer implements Iterable<Token>{
 }
 
 
+class Number extends Token{
+
+    public Number(String s, int r, int c){
+        super(s,r,c);
+    }
+
+    @Override
+    public String toString(){
+        return super.toString() + " Number (" + text + ")";
+    }
+
+}
+
 
 
 class Keyword extends Token{
 
     public Keyword(String s, int r, int c){
         super(s,r,c);
+    }
+
+    @Override
+    public String toString(){
+        return super.toString() + " Keyword (" + text + ")";
     }
 
 }
@@ -209,10 +321,11 @@ class Identifier extends Token{
         super(s,r,c);
     }
 
-
-    public int hash(){
-        return Math.abs(super.text.hashCode());
+    @Override
+    public String toString(){
+        return super.toString() + " IDENTIFIER (" + text + ")";
     }
+
 
 }
 
