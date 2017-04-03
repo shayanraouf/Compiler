@@ -20,7 +20,7 @@ class Lexer implements Iterable<Token>{
     private int col = 0;
     private char current;
     private char lookAHead;
-    private boolean flag = true;
+    private boolean readCurrent = true;
     private StringBuilder sb = new StringBuilder();
 
     public Lexer(String input){
@@ -37,20 +37,15 @@ class Lexer implements Iterable<Token>{
         }
 
     }
-
     public void setCurrent(char c){
         current = c;
     }
-
     public void setLookAHead(char c){
         lookAHead = c;
     }
-
     @Override
     public Iterator<Token> iterator(){
         Iterator<Token> it = new Iterator<Token>(){
-            private int elementIndex = 0;
-
             @Override
             public boolean hasNext(){
                 try{
@@ -63,22 +58,17 @@ class Lexer implements Iterable<Token>{
                     return false;
                 }
             }
-
             @Override
             public Token next(){
                 try{
-                    if(flag){
-                        setCurrent((char)in.read());
-                    }
+
                     return getToken();
                 }
                 catch (IOException e){
                     e.printStackTrace();
                     return null;
                 }
-
             }
-
             @Override
             public void remove() {
                 throw new UnsupportedOperationException();
@@ -86,16 +76,14 @@ class Lexer implements Iterable<Token>{
         };
         return it;
     }
-
-
-
     private Token getToken() throws IOException{
+            if(readCurrent) current = (char)in.read();
+            while(current == ' ' || current == '\n' || current == '\r' || current == '\t' || current == '\b') current = (char)in.read();
             col++;
             if(isLetter(current))return identifierToken(current,row,col,sb);
             if(isDigit(current))return digitToken(current,row,col,sb);
-            flag = true;                // reset flag to true 
+            readCurrent = true;                // reset flag to true
             switch (current){
-
                 case '(': return new Operator("(",row,col);
                 case ')': return new Operator(")",row,col);
                 case ' ': col--;
@@ -113,63 +101,47 @@ class Lexer implements Iterable<Token>{
                 case '-': return new Operator("-",row,col);
                 case '*': return new Operator("*",row,col);
                 case '/': return new Operator("/",row,col);
+                // TODO: 4/2/2017 comments 
                 case '~': return new Operator("~",row,col);
                 case '=': return new Operator("=",row,col);
                 case '^': return new Operator("^",row,col);
                 case '>':
-                    // TODO: 3/30/2017
+                    lookAHead = (char)in.read();
+                    if(lookAHead == '='){
+                        return new Operator(">=",row,col);
+                    }
+                    else if(lookAHead == '>'){
+                        return new Operator(">>",row,col);
+                    }
+                    else{
+                        current = lookAHead;
+                        readCurrent = false;
+                        return new Operator(">",row,col);
+                    }
                     // case for >=
-
                 case '<':
                     // TODO: 3/30/2017
                     // case for <=
-
                 case '!':
                     // TODO: 3/30/2017
                     // case for !=
                 case '&':
-//                    if(lookAHead){
-//                        char next = input.charAt(i + 1);
-//                        if(next == '&'){
-//                            tokens.add(new Operator("&&",row,col));
-//                            i++;
-//                        }
-//                        else{
-//                            tokens.add(new Operator("&",row,col));
-//                        }
-//                    }
-//                    else{
-//                        tokens.add(new Operator("&",row,col));
-//
-//                    }
+                    // TODO: 4/2/2017
                     break;
                 case '|':
-//                    if(lookAHead){
-//                        char next = input.charAt(i + 1);
-//                        if(next == '|'){
-//                            tokens.add(new Operator("||",row,col));
-//                            i++;
-//                        }
-//                        else{
-//                            tokens.add(new Operator("|",row,col));
-//                        }
-//                    }
-//                    else{
-//                        tokens.add(new Operator("|",row,col));
-//                    }
+                    // TODO: 4/2/2017
                     break;
                  default:
                      break;
                      // TODO: 3/30/2017
                      // handle error
-
             }
-
-        //}
-        //in.reset();
         return null;
     }
-
+    
+    private void comments(){
+        // TODO: 4/2/2017 handles comments and block comments  
+    }
 
     private Token identifierToken(char cur, int r, int c, StringBuilder sb) throws IOException{
         sb.append(cur);
@@ -177,7 +149,7 @@ class Lexer implements Iterable<Token>{
             lookAHead = (char)in.read();
             if(!isLetter(lookAHead) && !isDigit(lookAHead)){
                 setCurrent(lookAHead);
-                flag = false;
+                readCurrent = false;
                 break;
             }
             sb.append(lookAHead);
@@ -199,7 +171,7 @@ class Lexer implements Iterable<Token>{
             lookAHead = (char)in.read();
             if(!isDigit(lookAHead)){
                 setCurrent(lookAHead);
-                flag = false;
+                readCurrent = false;
                 break;
             }
             sb.append(lookAHead);
