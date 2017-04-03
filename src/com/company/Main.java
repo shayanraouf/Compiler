@@ -22,7 +22,7 @@ public class Main {
         Token token;
         while(it.hasNext()){
             token = it.next();
-            if(token == null) continue;
+            //if(token == null) continue;
             System.out.println(token);
         }
     }

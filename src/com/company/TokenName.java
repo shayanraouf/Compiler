@@ -8,8 +8,6 @@ import java.util.Map;
  */
 public class TokenName {
 
-
-
     public static Map<String,String> names = new HashMap<String,String>()
     {{
         put("(","OPEN_PAREN");
