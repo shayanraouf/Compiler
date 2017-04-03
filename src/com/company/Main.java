@@ -1,24 +1,29 @@
 package com.company;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.Iterator;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args){
+//        String s = "sadfjhsafjksafksd asd f asd3";
+//        CharSequence charSequence = new StringBuilder(s);
+
+
+
         double a4sf3 = 3e15;
-        new Main().run(args[0]);
+        new Main().run("tmp.txt");
 
     }
     public static void run(String in){
 
-        Lexer lexer = new Lexer(FileToString(in));
-
+        Lexer lexer = new Lexer(in);
         Iterator<Token> it = lexer.iterator();
+        Token token;
         while(it.hasNext()){
-            System.out.println(it.next());
+            token = it.next();
+            if(token == null) continue;
+            System.out.println(token);
         }
     }
 
