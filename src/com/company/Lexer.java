@@ -19,6 +19,7 @@ class Lexer implements Iterable<Token>{
     private int row = 1;
     private int col = 0;
     private char current;
+    private int currentInt;
     private char lookAHead;
     private boolean readCurrent = true;
     private StringBuilder sb = new StringBuilder();
@@ -61,8 +62,8 @@ class Lexer implements Iterable<Token>{
             @Override
             public Token next(){
                 try{
-
-                    return getToken();
+                    Token token = getToken();
+                    return token;
                 }
                 catch (IOException e){
                     e.printStackTrace();
@@ -76,10 +77,23 @@ class Lexer implements Iterable<Token>{
         };
         return it;
     }
+    /*sdfasfd
+    sasdf*/
+    /*sdfasfdsasdf*/
     private Token getToken() throws IOException{
+
             if(readCurrent) current = (char)in.read();
-            while(current == ' ' || current == '\n' || current == '\r' || current == '\t' || current == '\b') current = (char)in.read();
+            while(current == ' ' || current == '\r') current = (char)in.read();
+            if(current == '\n') {
+                current = (char)in.read();
+                row++;
+                col = 0;
+            }
             col++;
+            if(current == '/'){
+                Token token = comments(current,row,col);
+                if(token != null) return token;
+            }
             if(isLetter(current))return identifierToken(current,row,col,sb);
             if(isDigit(current))return digitToken(current,row,col,sb);
             readCurrent = true;                // reset flag to true
@@ -100,8 +114,6 @@ class Lexer implements Iterable<Token>{
                 case '+': return new Operator("+",row,col);
                 case '-': return new Operator("-",row,col);
                 case '*': return new Operator("*",row,col);
-                case '/': return new Operator("/",row,col);
-                // TODO: 4/2/2017 comments 
                 case '~': return new Operator("~",row,col);
                 case '=': return new Operator("=",row,col);
                 case '^': return new Operator("^",row,col);
@@ -138,11 +150,44 @@ class Lexer implements Iterable<Token>{
             }
         return null;
     }
-    
-    private void comments(){
-        // TODO: 4/2/2017 handles comments and block comments  
-    }
 
+    // returns null if comment or block comment
+    private Token comments(char cur, int r, int c)throws IOException{
+        lookAHead = (char)in.read();
+        //System.out.println("lookAHead " + lookAHead + " cur " + cur);
+
+        if(lookAHead != '*' && lookAHead != '/'){           // division Operator
+            current = lookAHead;
+            readCurrent = false;
+            return new Operator("/",r,c);
+        }
+
+        if(lookAHead == '/'){                           // regular comments
+
+            int next = in.read();
+            lookAHead = (char)next;
+
+            while(next != -1 && lookAHead != '\n'){     // terminates at the end of a line or end of a file
+                next = in.read();
+                lookAHead = (char)next;
+            }
+            row++;
+            col = 0;
+            readCurrent = true;
+        }
+        else if(lookAHead == '*'){                     // block comments
+            int next = in.read();
+            lookAHead = (char)next;
+            while(true){
+                while(lookAHead != '*'){
+                    lookAHead = (char)in.read();
+                }
+                lookAHead = (char)in.read();
+                if(lookAHead == '/') break;
+            }
+        }
+        return null;
+    }
     private Token identifierToken(char cur, int r, int c, StringBuilder sb) throws IOException{
         sb.append(cur);
         while(in.ready()){      // look a head operation
@@ -244,6 +289,15 @@ class Number extends Token{
 
 }
 
+class Comment extends Token{
+    public Comment(String s, int r, int c){
+        super(s,r,c);
+    }
+    @Override
+    public String toString(){
+        return "comment";
+    }
+}
 
 
 class Keyword extends Token{
