@@ -1,26 +1,17 @@
 package com.company;
-
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
-
 import java.io.*;
-import java.security.Key;
 import java.util.*;
 
 /**
  * Created by shayanraouf on 3/28/2017.
  */
 class Lexer implements Iterable<Token>{
-
-    private String input;
-    private List<Token> tokens;
     private Set<String> reservedKeyWords;
     private Map<Integer,String> symbolTable;
     private Reader in;
     private int row = 1;
     private int col = 0;
     private char current;
-    private int currentInt;
-    private char lookAHead;
     private boolean readCurrent = true;
     private StringBuilder sb = new StringBuilder();
 
@@ -38,12 +29,8 @@ class Lexer implements Iterable<Token>{
         }
 
     }
-    public void setCurrent(char c){
-        current = c;
-    }
-    public void setLookAHead(char c){
-        lookAHead = c;
-    }
+
+
     @Override
     public Iterator<Token> iterator(){
         Iterator<Token> it = new Iterator<Token>(){
@@ -118,7 +105,7 @@ class Lexer implements Iterable<Token>{
                 case '=': return new Operator("=",row,col);
                 case '^': return new Operator("^",row,col);
                 case '>':
-                    lookAHead = (char)in.read();
+                    char lookAHead = (char)in.read();
                     if(lookAHead == '='){
                         return new Operator(">=",row,col);
                     }
@@ -153,7 +140,7 @@ class Lexer implements Iterable<Token>{
 
     // returns null if comment or block comment
     private Token comments(char cur, int r, int c)throws IOException{
-        lookAHead = (char)in.read();
+        char lookAHead = (char)in.read();
         //System.out.println("lookAHead " + lookAHead + " cur " + cur);
 
         if(lookAHead != '*' && lookAHead != '/'){           // division Operator
@@ -191,9 +178,9 @@ class Lexer implements Iterable<Token>{
     private Token identifierToken(char cur, int r, int c, StringBuilder sb) throws IOException{
         sb.append(cur);
         while(in.ready()){      // look a head operation
-            lookAHead = (char)in.read();
+            char lookAHead = (char)in.read();
             if(!isLetter(lookAHead) && !isDigit(lookAHead)){
-                setCurrent(lookAHead);
+                current = lookAHead;
                 readCurrent = false;
                 break;
             }
@@ -213,9 +200,9 @@ class Lexer implements Iterable<Token>{
     private Token digitToken(char cur, int r, int c, StringBuilder sb) throws IOException{
         sb.append(cur);
         while(in.ready()){
-            lookAHead = (char)in.read();
+            char lookAHead = (char)in.read();
             if(!isDigit(lookAHead)){
-                setCurrent(lookAHead);
+                current = lookAHead;
                 readCurrent = false;
                 break;
             }
@@ -244,7 +231,6 @@ class Lexer implements Iterable<Token>{
     public void initializeMap(){
         reservedKeyWords = new HashSet<>();
         symbolTable = new HashMap<>();
-        tokens = new ArrayList<>();
 
         //Adding all the operators
         reservedKeyWords.add("!");
@@ -264,12 +250,13 @@ class Lexer implements Iterable<Token>{
         reservedKeyWords.add("<");
         reservedKeyWords.add(">=");
         reservedKeyWords.add("<=");
-
+        reservedKeyWords.add("int");
         reservedKeyWords.add("for");
         reservedKeyWords.add("this");
         reservedKeyWords.add("if");
         reservedKeyWords.add("else");
         reservedKeyWords.add("null");
+        reservedKeyWords.add("void");
 
     }
 
