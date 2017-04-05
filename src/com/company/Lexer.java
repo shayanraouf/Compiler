@@ -158,6 +158,8 @@ class Lexer implements Iterable<Token>{
                         return new Operator("&&",row,col);
                     }
                     else {
+                        current = lookAHead;
+                        readCurrent = false;
                         return new Operator("&", row, col);
                     }
 
@@ -167,7 +169,9 @@ class Lexer implements Iterable<Token>{
                         return new Operator("||",row,col);
                     }
                     else {
-                        return new Operator("|", row, col);   // TODO: 4/4/2017 (this logic is being skipped in some cases)
+                        current = lookAHead;
+                        readCurrent = false;
+                        return new Operator("|", row, col);
                     }
 
                 default:
