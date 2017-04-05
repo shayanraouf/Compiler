@@ -34,7 +34,6 @@ class Lexer implements Iterable<Token>{
         }
         catch (IOException e) {
             e.printStackTrace();
-
         }
 
     }
@@ -50,9 +49,7 @@ class Lexer implements Iterable<Token>{
             @Override
             public boolean hasNext(){
                 try{
-
                     return in.ready();
-
                 }
                 catch (IOException e){
                     e.printStackTrace();
@@ -130,20 +127,50 @@ class Lexer implements Iterable<Token>{
                         readCurrent = false;
                         return new Operator(">",row,col);
                     }
-                    // case for >=
                 case '<':
-                    // TODO: 3/30/2017
-                    // case for <=
+                    lookAHead = (char)in.read();
+                    if(lookAHead == '='){
+                        return new Operator("<=",row,col);
+                    }
+                    else if(lookAHead == '<'){
+                        return new Operator("<<",row,col);
+                    }
+                    else{
+                        current = lookAHead;
+                        readCurrent = false;
+                        return new Operator("<",row,col);
+                    }
+
                 case '!':
-                    // TODO: 3/30/2017
-                    // case for !=
+                    lookAHead = (char)in.read();
+                    if(lookAHead == '='){
+                        return new Operator("!=",row,col);
+                    }
+                    else{
+                        current = lookAHead;
+                        readCurrent = false;
+                        return new Operator("!",row,col);
+                    }
+
                 case '&':
-                    // TODO: 4/2/2017
-                    break;
+                    lookAHead = (char)in.read();
+                    if(lookAHead == '&'){
+                        return new Operator("&&",row,col);
+                    }
+                    else {
+                        return new Operator("&", row, col);
+                    }
+
                 case '|':
-                    // TODO: 4/2/2017
-                    break;
-                 default:
+                    lookAHead = (char)in.read();
+                    if(lookAHead == '|'){
+                        return new Operator("||",row,col);
+                    }
+                    else {
+                        return new Operator("|", row, col);   // TODO: 4/4/2017 (this logic is being skipped in some cases)
+                    }
+
+                default:
                      break;
                      // TODO: 3/30/2017
                      // handle error

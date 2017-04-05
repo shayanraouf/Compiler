@@ -12,7 +12,7 @@ public class Main {
 
 
         double a4sf3 = 3e15;
-        new Main().run("tmp.txt");
+        new Main().run("C:\\Users\\jtryg\\Desktop\\Lexical-Analyzer\\src\\tmp.txt");
 
     }
     public static void run(String in){

@@ -22,12 +22,14 @@ public class TokenName {
         put("-","MINUS");
         put("*","MULTIPLICATION");
         put("/","DIVISON");
-        put("~","NOTSURE");
+        put("~","DASH");
         put("=","ASSIGNMENT_OPERATOR");
+        put("!=","NOT_EQUALTO_ASSIGNMENT_OPERATOR");
         put(">","GREATER_THAN_OPERATOR");
         put(">=","GREATER_THAN_EQUALTO_OPERATOR");
         put("<","LESS_THAN_OPERATOR");
         put("<=","LESS_THAN_EQUALTO_OPERATOR");
+        put("!", "NOT_EQUALTO");
         put("&","BITWISE_AND");
         put("&&","LOGICAL_AND");
         put("|","BITWISE_OR");
