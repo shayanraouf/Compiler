@@ -307,15 +307,6 @@ class Number extends Token{
 
 }
 
-class Comment extends Token{
-    public Comment(String s, int r, int c){
-        super(s,r,c);
-    }
-    @Override
-    public String toString(){
-        return "comment";
-    }
-}
 
 
 class Keyword extends Token{
