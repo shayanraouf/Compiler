@@ -82,22 +82,17 @@ class Lexer implements Iterable<Token>{
             if(isDigit(current))return digitToken(current,row,col,sb);
             readCurrent = true;                // reset flag to true
             switch (current){
-                case '(': return new Operator("(",row,col);
-                case ')': return new Operator(")",row,col);
-                case ' ': col--;
-                          break;
-                case '\n': col = 0;
-                           row++;
-                           break;
-                case '[': return new Operator("[",row,col);
-                case ']': return new Operator("]",row,col);
-                case '{': return new Operator("{",row,col);
-                case '}': return new Operator("}",row,col);
-                case ',': return new Operator(",",row,col);
-                case ';': return new Operator(";",row,col);
-                case '+': return new Operator("+",row,col);
-                case '-': return new Operator("-",row,col);
-                case '*': return new Operator("*",row,col);
+                case '(': return new LeftParanthesis(row,col);
+                case ')': return new RightParanthesis(row,col);
+                case '[': return new LeftBracket(row,col);
+                case ']': return new RightBracket(row,col);
+                case '{': return new LeftBrace(row,col);
+                case '}': return new RightBrace(row,col);
+                case ',': return new Comma(row,col);
+                case ';': return new SemiColon(row,col);
+                case '+': return OperatorFactory.createOp('+',row,col);
+                case '-': return OperatorFactory.createOp('-',row,col);
+                case '*': return OperatorFactory.createOp('*',row,col);
                 case '~': return new Operator("~",row,col);
                 case '=': return new Operator("=",row,col);
                 case '^': return new Operator("^",row,col);
@@ -177,7 +172,7 @@ class Lexer implements Iterable<Token>{
         if(lookAHead != '*' && lookAHead != '/'){           // division Operator
             current = lookAHead;
             readCurrent = false;
-            return new Operator("/",r,c);
+            return OperatorFactory.createOp('/',r,c);
         }
 
         if(lookAHead == '/'){                           // regular comments
@@ -327,15 +322,68 @@ class Operator extends Token{
     public Operator(String s, int r, int c){
         super(s,r,c);
 
+
     }
 
     @Override
     public String toString(){
-        return super.toString() + " " + TokenName.names.get(super.text);
+        return super.toString();
     }
 
     
 }
+
+class OperatorFactory{
+    public static Operator createOp(char ch, int r, int c){
+        Operator operator = null;
+
+        switch (ch){
+            case '+':
+                operator = new Addition(r,c);
+                break;
+            case '-':
+                operator = new Subtraction(r,c);
+                break;
+            case '*':
+                operator = new Multiplication(r,c);
+                break;
+            case '/':
+                operator = new Division(r,c);
+                break;
+            default:
+                throw new IllegalArgumentException("Not an Operator");
+        }
+        return operator;
+    }
+}
+
+class Addition extends Operator{
+    public Addition(int r, int c){
+        super("+",r,c);
+    }
+}
+
+class Subtraction extends Operator{
+    public Subtraction(int r, int c){
+        super("-",r,c);
+    }
+}
+
+class Multiplication extends Operator{
+    public Multiplication(int r, int c){
+        super("*",r,c);
+    }
+}
+
+
+
+class Division extends Operator{
+    public Division(int r, int c){
+        super("/",r,c);
+    }
+}
+
+
 
 class Identifier extends Token{
     public Identifier(String s,int r, int c){
@@ -352,8 +400,9 @@ class Identifier extends Token{
 
 class Comma extends Token{
     
-    public Comma(String s, int r, int c){
-        super(s,r,c);
+    public Comma( int r, int c){
+        super(",",r,c);
+
     }
     
 }
@@ -362,52 +411,52 @@ class Comma extends Token{
 
 class SemiColon extends Token{
 
-    public SemiColon(String s, int r, int c){
-        super(s,r,c);
+    public SemiColon(int r, int c){
+        super(";",r,c);
     }
 }
 
 
 class LeftParanthesis extends Token{
-    public LeftParanthesis(String s, int r, int c){
-        super(s,r,c);
+    public LeftParanthesis(int r, int c){
+        super("(",r,c);
     }
 
 }
 
 class RightParanthesis extends Token{
 
-    public RightParanthesis(String s, int r, int c) {
-        super(s,r,c);
+    public RightParanthesis(int r, int c) {
+        super(")",r,c);
     }
 }
 
 class LeftBracket extends Token{
 
-    public LeftBracket(String s, int r, int c){
-        super(s,r,c);
+    public LeftBracket(int r, int c){
+        super("[",r,c);
     }
 }
 
 class RightBracket extends Token{
     
-    public RightBracket(String s, int r, int c){
-        super(s,r,c);
+    public RightBracket(int r, int c){
+        super("]",r,c);
     }
 }
 
 
 class LeftBrace extends Token{
 
-    public LeftBrace(String s, int r, int c){
-        super(s,r,c);
+    public LeftBrace(int r, int c){
+        super("{",r,c);
     }
 }
 
 class RightBrace extends Token{
     
-    public RightBrace(String s, int r, int c){
-        super(s,r,c);
+    public RightBrace(int r, int c){
+        super("}",r,c);
     }
 }
 
