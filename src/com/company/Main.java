@@ -25,6 +25,15 @@ public class Main {
         while(it.hasNext()){
             token = it.next();
             if(token == null) continue;
+            if(token instanceof ArithmeticOp){
+                if(token instanceof Addition){
+                    System.out.print("Addition ");
+                }
+
+                if(token instanceof Subtraction){
+                    System.out.print("Subtraction ");
+                }
+            }
             System.out.println(token);
         }
     }

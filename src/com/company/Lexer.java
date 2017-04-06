@@ -90,9 +90,9 @@ class Lexer implements Iterable<Token>{
                 case '}': return new RightBrace(row,col);
                 case ',': return new Comma(row,col);
                 case ';': return new SemiColon(row,col);
-                case '+': return OperatorFactory.createOp('+',row,col);
-                case '-': return OperatorFactory.createOp('-',row,col);
-                case '*': return OperatorFactory.createOp('*',row,col);
+                case '+': return new Addition(row,col);
+                case '-': return new Subtraction(row,col);
+                case '*': return new Multiplication(row,col);
                 case '~': return new Operator("~",row,col);
                 case '=': return new Operator("=",row,col);
                 case '^': return new Operator("^",row,col);
@@ -172,7 +172,7 @@ class Lexer implements Iterable<Token>{
         if(lookAHead != '*' && lookAHead != '/'){           // division Operator
             current = lookAHead;
             readCurrent = false;
-            return OperatorFactory.createOp('/',r,c);
+            return new Division(row,col);
         }
 
         if(lookAHead == '/'){                           // regular comments
@@ -257,25 +257,22 @@ class Lexer implements Iterable<Token>{
     public void initializeMap(){
         reservedKeyWords = new HashSet<>();
         symbolTable = new HashMap<>();
-
-        //Adding all the operators
-        reservedKeyWords.add("!");
-        reservedKeyWords.add("!=");
-        reservedKeyWords.add("+");
-        reservedKeyWords.add("-");
-
-
-        reservedKeyWords.add("*");
-        reservedKeyWords.add("/");
-
-        reservedKeyWords.add("&");
-        reservedKeyWords.add("|");
-        reservedKeyWords.add("~");
-
-        reservedKeyWords.add(">");
-        reservedKeyWords.add("<");
-        reservedKeyWords.add(">=");
-        reservedKeyWords.add("<=");
+        // Adding all the necessary reserved keywords
+        reservedKeyWords.add("byte");
+        reservedKeyWords.add("const");
+        reservedKeyWords.add("end");
+        reservedKeyWords.add("exit");
+        reservedKeyWords.add("float64");
+        reservedKeyWords.add("function");
+        reservedKeyWords.add("int32");
+        reservedKeyWords.add("print");
+        reservedKeyWords.add("record");
+        reservedKeyWords.add("ref");
+        reservedKeyWords.add("static");
+        reservedKeyWords.add("return");
+        reservedKeyWords.add("type");
+        reservedKeyWords.add("var");
+        reservedKeyWords.add("while");
         reservedKeyWords.add("int");
         reservedKeyWords.add("for");
         reservedKeyWords.add("this");
@@ -283,11 +280,71 @@ class Lexer implements Iterable<Token>{
         reservedKeyWords.add("else");
         reservedKeyWords.add("null");
         reservedKeyWords.add("void");
-
     }
-
 }
 
+
+
+
+class ArithmeticOp extends Operator{
+
+    public ArithmeticOp(String s, int r, int c) {
+        super(s, r, c);
+    }
+}
+
+
+class RelationalOp extends Operator{
+
+    public RelationalOp(String s, int r, int c) {
+        super(s, r, c);
+    }
+}
+
+
+class BitwiseOp extends Operator{
+
+    public BitwiseOp(String s, int r, int c) {
+        super(s, r, c);
+    }
+}
+
+
+class LogicalOp extends Operator{
+
+    public LogicalOp(String s, int r, int c) {
+        super(s, r, c);
+    }
+}
+
+class AssignmentOp extends Operator{
+
+    public AssignmentOp(String s, int r, int c) {
+        super(s, r, c);
+    }
+}
+
+
+
+class MicsOp extends Operator{
+
+    public MicsOp(String s, int r, int c) {
+        super(s, r, c);
+    }
+}
+
+
+class BitwiseOR extends BitwiseOp{
+    public BitwiseOR(int r, int c){
+        super("|",r,c);
+    }
+}
+
+class BitwiseAND extends BitwiseOp{
+    public BitwiseAND(int r, int c){
+        super("&",r,c);
+    }
+}
 
 class Number extends Token{
 
@@ -301,8 +358,6 @@ class Number extends Token{
     }
 
 }
-
-
 
 class Keyword extends Token{
 
@@ -322,7 +377,6 @@ class Operator extends Token{
     public Operator(String s, int r, int c){
         super(s,r,c);
 
-
     }
 
     @Override
@@ -333,43 +387,20 @@ class Operator extends Token{
     
 }
 
-class OperatorFactory{
-    public static Operator createOp(char ch, int r, int c){
-        Operator operator = null;
 
-        switch (ch){
-            case '+':
-                operator = new Addition(r,c);
-                break;
-            case '-':
-                operator = new Subtraction(r,c);
-                break;
-            case '*':
-                operator = new Multiplication(r,c);
-                break;
-            case '/':
-                operator = new Division(r,c);
-                break;
-            default:
-                throw new IllegalArgumentException("Not an Operator");
-        }
-        return operator;
-    }
-}
-
-class Addition extends Operator{
+class Addition extends ArithmeticOp{
     public Addition(int r, int c){
         super("+",r,c);
     }
 }
 
-class Subtraction extends Operator{
+class Subtraction extends ArithmeticOp{
     public Subtraction(int r, int c){
         super("-",r,c);
     }
 }
 
-class Multiplication extends Operator{
+class Multiplication extends ArithmeticOp{
     public Multiplication(int r, int c){
         super("*",r,c);
     }
@@ -377,7 +408,7 @@ class Multiplication extends Operator{
 
 
 
-class Division extends Operator{
+class Division extends ArithmeticOp{
     public Division(int r, int c){
         super("/",r,c);
     }
