@@ -17,9 +17,20 @@ public class Token {
         this.col = col;
     }
 
+    public String getType(){
+        return text;
+    }
+
     @Override
     public String toString(){
-        return "[" + row + "," + col + "]";
+        String name = TokenName.names.get(text);
+        if(name != null){
+            return "[" + row + "," + col + "]" + " " + TokenName.names.get(text);
+        }
+        else{
+            return "[" + row + "," + col + "]";
+        }
+
     }
 
 }
