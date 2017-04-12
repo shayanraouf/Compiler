@@ -1,4 +1,11 @@
-package com.company;
+/*
+  Lexical Analyzer
+  Authors: Shayan Raouf & Josh Trygg
+  CSS 448 - Compilers - Bernstein
+  Lexer.java
+ */
+
+
 
 import java.io.*;
 import java.util.Iterator;
@@ -6,17 +13,13 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args){
-
-//        String s = "sadfjhsafjksafksd asd f asd3";
-//        CharSequence charSequence = new StringBuilder(s);
-
-
-
-        double a4sf3 = 3e15;
-
-        new Main().run("tmp.txt");
+	
+        //new Main().run((String)args[0]);
+	  new Main().run("tmp.txt");
 
     }
+
+
     public static void run(String in){
 
         Lexer lexer = new Lexer(in);
@@ -36,12 +39,10 @@ public class Main {
             scanner = new Scanner(new File(input));
             sb = new StringBuilder();
 
-
             while(scanner.hasNextLine()){
                 sb.append(scanner.nextLine());
                 sb.append("\n");
             }
-
         }
         catch (Exception e){
             System.err.println("Error " + e);
@@ -51,5 +52,5 @@ public class Main {
             scanner.close();
             return sb.toString();
         }
-    }
+    } 
 }
