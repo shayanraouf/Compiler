@@ -1,8 +1,13 @@
-package com.company;
-
-/**
- * Created by shayanraouf on 3/29/2017.
+/*
+  Lexical Analyzer
+  Authors: Shayan Raouf & Josh Trygg
+  CSS 448 - Compilers - Bernstein
+  Lexer.java
  */
+
+
+
+
 public class Token {
     protected int row,col;
     protected String text;

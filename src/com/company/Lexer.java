@@ -1,10 +1,14 @@
-package com.company;
+/*
+  Lexical Analyzer
+  Authors: Shayan Raouf & Josh Trygg
+  CSS 448 - Compilers - Bernstein
+  Lexer.java
+ */
+
 import java.io.*;
 import java.util.*;
 
-/**
- * Created by shayanraouf on 3/28/2017.
- */
+
 class Lexer implements Iterable<Token>{
     private Set<String> reservedKeyWords;
     private Map<Integer,String> symbolTable;
@@ -26,7 +30,6 @@ class Lexer implements Iterable<Token>{
         catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
 
@@ -61,18 +64,16 @@ class Lexer implements Iterable<Token>{
         };
         return it;
     }
-    /*sdfasfd
-    sasdf*/
-    /*sdfasfdsasdf*/
+
     private Token getToken() throws IOException{
 
-            if(readCurrent) current = (char)in.read();
-            while(current == ' ' || current == '\r') current = (char)in.read();
-            if(current == '\n') {
-                current = (char)in.read();
-                row++;
-                col = 0;
-            }
+        if(readCurrent) current = (char)in.read();
+        while(current == ' ' || current == '\r') current = (char)in.read();
+        while(current == '\n') {
+            current = (char)in.read();
+            row++;
+            col = 0;
+        }
             col++;
             if(current == '/'){
                 Token token = comments(current,row,col);
@@ -93,65 +94,75 @@ class Lexer implements Iterable<Token>{
                 case '+': return OperatorFactory.createOp('+',row,col);
                 case '-': return OperatorFactory.createOp('-',row,col);
                 case '*': return OperatorFactory.createOp('*',row,col);
-                case '~': return new Operator("~",row,col);
-                case '=': return new Operator("=",row,col);
-                case '^': return new Operator("^",row,col);
+                case '~': return OperatorFactory.createOp('~',row,col);
+                case '^': return OperatorFactory.createOp('^',row,col);
+                case '=':
+                    char lookAhead = (char)in.read();
+                    if(lookAhead == '='){
+                        return new Operator("==", row,col);
+                    }
+                    else{
+                        current = lookAhead;
+                        readCurrent = false;
+                        return new Operator("=",row,col);
+                    }
+
                 case '>':
-                    char lookAHead = (char)in.read();
-                    if(lookAHead == '='){
+                    lookAhead = (char)in.read();
+                    if(lookAhead == '='){
                         return new Operator(">=",row,col);
                     }
-                    else if(lookAHead == '>'){
+                    else if(lookAhead == '>'){
                         return new Operator(">>",row,col);
                     }
                     else{
-                        current = lookAHead;
+                        current = lookAhead;
                         readCurrent = false;
                         return new Operator(">",row,col);
                     }
                 case '<':
-                    lookAHead = (char)in.read();
-                    if(lookAHead == '='){
+                    lookAhead = (char)in.read();
+                    if(lookAhead == '='){
                         return new Operator("<=",row,col);
                     }
-                    else if(lookAHead == '<'){
+                    else if(lookAhead == '<'){
                         return new Operator("<<",row,col);
                     }
                     else{
-                        current = lookAHead;
+                        current = lookAhead;
                         readCurrent = false;
                         return new Operator("<",row,col);
                     }
 
                 case '!':
-                    lookAHead = (char)in.read();
-                    if(lookAHead == '='){
+                    lookAhead = (char)in.read();
+                    if(lookAhead == '='){
                         return new Operator("!=",row,col);
                     }
                     else{
-                        current = lookAHead;
+                        current = lookAhead;
                         readCurrent = false;
                         return new Operator("!",row,col);
                     }
 
                 case '&':
-                    lookAHead = (char)in.read();
-                    if(lookAHead == '&'){
+                    lookAhead = (char)in.read();
+                    if(lookAhead == '&'){
                         return new Operator("&&",row,col);
                     }
                     else {
-                        current = lookAHead;
+                        current = lookAhead;
                         readCurrent = false;
                         return new Operator("&", row, col);
                     }
 
                 case '|':
-                    lookAHead = (char)in.read();
-                    if(lookAHead == '|'){
+                    lookAhead = (char)in.read();
+                    if(lookAhead == '|'){
                         return new Operator("||",row,col);
                     }
                     else {
-                        current = lookAHead;
+                        current = lookAhead;
                         readCurrent = false;
                         return new Operator("|", row, col);
                     }
@@ -166,37 +177,37 @@ class Lexer implements Iterable<Token>{
 
     // returns null if comment or block comment
     private Token comments(char cur, int r, int c)throws IOException{
-        char lookAHead = (char)in.read();
-        //System.out.println("lookAHead " + lookAHead + " cur " + cur);
+        char lookAhead = (char)in.read();
+        //System.out.println("lookAhead " + lookAhead + " cur " + cur);
 
-        if(lookAHead != '*' && lookAHead != '/'){           // division Operator
-            current = lookAHead;
+        if(lookAhead != '*' && lookAhead != '/'){           // division Operator
+            current = lookAhead;
             readCurrent = false;
             return OperatorFactory.createOp('/',r,c);
         }
 
-        if(lookAHead == '/'){                           // regular comments
+        if(lookAhead == '/'){                           // regular comments
 
             int next = in.read();
-            lookAHead = (char)next;
+            lookAhead = (char)next;
 
-            while(next != -1 && lookAHead != '\n'){     // terminates at the end of a line or end of a file
+            while(next != -1 && lookAhead != '\n'){     // terminates at the end of a line or end of a file
                 next = in.read();
-                lookAHead = (char)next;
+                lookAhead = (char)next;
             }
             row++;
             col = 0;
             readCurrent = true;
         }
-        else if(lookAHead == '*'){                     // block comments
+        else if(lookAhead == '*'){                     // block comments
             int next = in.read();
-            lookAHead = (char)next;
+            lookAhead = (char)next;
             while(true){
-                while(lookAHead != '*'){
-                    lookAHead = (char)in.read();
+                while(lookAhead != '*'){
+                    lookAhead = (char)in.read();
                 }
-                lookAHead = (char)in.read();
-                if(lookAHead == '/') break;
+                lookAhead = (char)in.read();
+                if(lookAhead == '/') break;
             }
         }
         return null;
@@ -204,13 +215,14 @@ class Lexer implements Iterable<Token>{
     private Token identifierToken(char cur, int r, int c, StringBuilder sb) throws IOException{
         sb.append(cur);
         while(in.ready()){      // look a head operation
-            char lookAHead = (char)in.read();
-            if(!isLetter(lookAHead) && !isDigit(lookAHead)){
-                current = lookAHead;
+            char lookAhead = (char)in.read();
+            if(!isLetter(lookAhead) && !isDigit(lookAhead)){
+                current = lookAhead;
                 readCurrent = false;
                 break;
             }
-            sb.append(lookAHead);
+            col++;
+            sb.append(lookAhead);
         }
         String word = sb.toString();
         Token token;
@@ -226,18 +238,26 @@ class Lexer implements Iterable<Token>{
     private Token digitToken(char cur, int r, int c, StringBuilder sb) throws IOException{
         sb.append(cur);
         while(in.ready()){
-            char lookAHead = (char)in.read();
-            if(!isDigit(lookAHead)){
-                current = lookAHead;
+            char lookAhead = (char)in.read();
+            if(!isDigit(lookAhead)){
+                if (lookAhead == '.')
+                {
+
+                }
+                current = lookAhead;
                 readCurrent = false;
                 break;
             }
-            sb.append(lookAHead);
+            col++;
+            sb.append(lookAhead);
         }
         Token token = new Number(sb.toString(),r,c);
         clearStringBuilder(sb);
         return token;
     }
+
+
+
 
     private void clearStringBuilder(StringBuilder sb){
         sb.setLength(0);
@@ -252,42 +272,53 @@ class Lexer implements Iterable<Token>{
     }
 
 
-
-
     public void initializeMap(){
         reservedKeyWords = new HashSet<>();
         symbolTable = new HashMap<>();
 
         //Adding all the operators
         reservedKeyWords.add("!");
-        reservedKeyWords.add("!=");
+        reservedKeyWords.add("~");
+        reservedKeyWords.add("*");
+        reservedKeyWords.add("/");
         reservedKeyWords.add("+");
         reservedKeyWords.add("-");
 
-
-        reservedKeyWords.add("*");
-        reservedKeyWords.add("/");
-
         reservedKeyWords.add("&");
         reservedKeyWords.add("|");
-        reservedKeyWords.add("~");
+        reservedKeyWords.add("^");
 
         reservedKeyWords.add(">");
         reservedKeyWords.add("<");
         reservedKeyWords.add(">=");
         reservedKeyWords.add("<=");
-        reservedKeyWords.add("int");
+        reservedKeyWords.add("==");
+        reservedKeyWords.add("!=");
+
+
         reservedKeyWords.add("for");
         reservedKeyWords.add("this");
-        reservedKeyWords.add("if");
+
+        reservedKeyWords.add("byte");
+        reservedKeyWords.add("const");
         reservedKeyWords.add("else");
-        reservedKeyWords.add("null");
-        reservedKeyWords.add("void");
-
+        reservedKeyWords.add("end");
+        reservedKeyWords.add("exit");
+        reservedKeyWords.add("float64");
+        reservedKeyWords.add("for");
+        reservedKeyWords.add("function");
+        reservedKeyWords.add("if");
+        reservedKeyWords.add("int32");
+        reservedKeyWords.add("print");
+        reservedKeyWords.add("record");
+        reservedKeyWords.add("ref");
+        reservedKeyWords.add("return");
+        reservedKeyWords.add("static");
+        reservedKeyWords.add("type");
+        reservedKeyWords.add("var");
+        reservedKeyWords.add("while");
     }
-
 }
-
 
 class Number extends Token{
 
@@ -301,6 +332,8 @@ class Number extends Token{
     }
 
 }
+
+
 
 
 
@@ -350,6 +383,12 @@ class OperatorFactory{
             case '/':
                 operator = new Division(r,c);
                 break;
+            case '~':
+                operator = new BitwiseNot(r,c);
+                break;
+            case '^':
+                operator = new BitwiseXOR(r,c);
+                break;
             default:
                 throw new IllegalArgumentException("Not an Operator");
         }
@@ -375,14 +414,23 @@ class Multiplication extends Operator{
     }
 }
 
-
-
 class Division extends Operator{
     public Division(int r, int c){
         super("/",r,c);
     }
 }
 
+class BitwiseNot extends Operator{
+    public BitwiseNot(int r, int c){
+        super("~",r,c);
+    }
+}
+
+class BitwiseXOR extends Operator{
+    public BitwiseXOR(int r, int c){
+        super("^",r,c);
+    }
+}
 
 
 class Identifier extends Token{
@@ -402,11 +450,8 @@ class Comma extends Token{
     
     public Comma( int r, int c){
         super(",",r,c);
-
     }
-    
 }
-
 
 
 class SemiColon extends Token{
