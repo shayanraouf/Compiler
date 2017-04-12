@@ -1,10 +1,15 @@
+/*
+  Lexical Analyzer
+  Authors: Shayan Raouf & Josh Trygg
+  CSS 448 - Compilers - Bernstein
+  Lexer.java
+ */
+
 package com.company;
 import java.io.*;
 import java.util.*;
 
-/**
- * Created by shayanraouf on 3/28/2017.
- */
+
 class Lexer implements Iterable<Token>{
     private Set<String> reservedKeyWords;
     private Map<Integer,String> symbolTable;
@@ -26,7 +31,6 @@ class Lexer implements Iterable<Token>{
         catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
 
@@ -61,18 +65,16 @@ class Lexer implements Iterable<Token>{
         };
         return it;
     }
-    /*sdfasfd
-    sasdf*/
-    /*sdfasfdsasdf*/
+
     private Token getToken() throws IOException{
 
-            if(readCurrent) current = (char)in.read();
-            while(current == ' ' || current == '\r') current = (char)in.read();
-            if(current == '\n') {
-                current = (char)in.read();
-                row++;
-                col = 0;
-            }
+        if(readCurrent) current = (char)in.read();
+        while(current == ' ' || current == '\r') current = (char)in.read();
+        if(current == '\n') {
+            current = (char)in.read();
+            row++;
+            col = 0;
+        }
             col++;
             if(current == '/'){
                 Token token = comments(current,row,col);
@@ -94,10 +96,20 @@ class Lexer implements Iterable<Token>{
                 case '-': return OperatorFactory.createOp('-',row,col);
                 case '*': return OperatorFactory.createOp('*',row,col);
                 case '~': return new Operator("~",row,col);
-                case '=': return new Operator("=",row,col);
                 case '^': return new Operator("^",row,col);
-                case '>':
+                case '=':
                     char lookAHead = (char)in.read();
+                    if(lookAHead == '='){
+                        return new Operator("==", row,col);
+                    }
+                    else{
+                        current = lookAHead;
+                        readCurrent = false;
+                        return new Operator("=",row,col);
+                    }
+
+                case '>':
+                    lookAHead = (char)in.read();
                     if(lookAHead == '='){
                         return new Operator(">=",row,col);
                     }
@@ -232,12 +244,22 @@ class Lexer implements Iterable<Token>{
                 readCurrent = false;
                 break;
             }
+            /*
+             // Need to implement logic for floating point numbers
+            else if(lookAHead == '.')
+
+               decimal = true;
+             */
+
             sb.append(lookAHead);
         }
         Token token = new Number(sb.toString(),r,c);
         clearStringBuilder(sb);
         return token;
     }
+
+
+
 
     private void clearStringBuilder(StringBuilder sb){
         sb.setLength(0);
@@ -252,42 +274,53 @@ class Lexer implements Iterable<Token>{
     }
 
 
-
-
     public void initializeMap(){
         reservedKeyWords = new HashSet<>();
         symbolTable = new HashMap<>();
 
         //Adding all the operators
         reservedKeyWords.add("!");
-        reservedKeyWords.add("!=");
+        reservedKeyWords.add("~");
+        reservedKeyWords.add("*");
+        reservedKeyWords.add("/");
         reservedKeyWords.add("+");
         reservedKeyWords.add("-");
 
-
-        reservedKeyWords.add("*");
-        reservedKeyWords.add("/");
-
         reservedKeyWords.add("&");
         reservedKeyWords.add("|");
-        reservedKeyWords.add("~");
+        reservedKeyWords.add("^");
 
         reservedKeyWords.add(">");
         reservedKeyWords.add("<");
         reservedKeyWords.add(">=");
         reservedKeyWords.add("<=");
-        reservedKeyWords.add("int");
+        reservedKeyWords.add("==");
+        reservedKeyWords.add("!=");
+
+
         reservedKeyWords.add("for");
         reservedKeyWords.add("this");
-        reservedKeyWords.add("if");
+
+        reservedKeyWords.add("byte");
+        reservedKeyWords.add("const");
         reservedKeyWords.add("else");
-        reservedKeyWords.add("null");
-        reservedKeyWords.add("void");
-
+        reservedKeyWords.add("end");
+        reservedKeyWords.add("exit");
+        reservedKeyWords.add("float64");
+        reservedKeyWords.add("for");
+        reservedKeyWords.add("function");
+        reservedKeyWords.add("if");
+        reservedKeyWords.add("int32");
+        reservedKeyWords.add("print");
+        reservedKeyWords.add("record");
+        reservedKeyWords.add("ref");
+        reservedKeyWords.add("return");
+        reservedKeyWords.add("static");
+        reservedKeyWords.add("type");
+        reservedKeyWords.add("var");
+        reservedKeyWords.add("while");
     }
-
 }
-
 
 class Number extends Token{
 
@@ -402,11 +435,8 @@ class Comma extends Token{
     
     public Comma( int r, int c){
         super(",",r,c);
-
     }
-    
 }
-
 
 
 class SemiColon extends Token{

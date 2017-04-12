@@ -1,11 +1,15 @@
+/*
+  Lexical Analyzer
+  Authors: Shayan Raouf & Josh Trygg
+  CSS 448 - Compilers - Bernstein
+  Lexer.java
+ */
+
 package com.company;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by shayanraouf on 3/30/2017.
- */
 public class TokenName {
 
     public static Map<String,String> names = new HashMap<String,String>()
@@ -22,10 +26,13 @@ public class TokenName {
         put("-","MINUS");
         put("*","MULTIPLICATION");
         put("/","DIVISON");
-        put("~","DASH");
+        put("~","SQUIGGLE");
         put("=","ASSIGNMENT_OPERATOR");
+        put("==", "EQUALTO");
         put("!=","NOT_EQUALTO_ASSIGNMENT_OPERATOR");
         put(">","GREATER_THAN_OPERATOR");
+        put(">>","IN_STREAM");
+        put("<<","OUT_STREAM");
         put(">=","GREATER_THAN_EQUALTO_OPERATOR");
         put("<","LESS_THAN_OPERATOR");
         put("<=","LESS_THAN_EQUALTO_OPERATOR");
