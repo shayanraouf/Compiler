@@ -15,7 +15,7 @@ public class Main {
     public static void main(String[] args){
 	
         //new Main().run((String)args[0]);
-	  new Main().run("tmp.txt");
+	  new Main().run(args[0]);
 
     }
 
