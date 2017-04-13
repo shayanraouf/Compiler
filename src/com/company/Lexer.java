@@ -236,22 +236,39 @@ class Lexer implements Iterable<Token>{
     }
 
     private Token digitToken(char cur, int r, int c, StringBuilder sb) throws IOException{
+        boolean floatSighting = false;
         sb.append(cur);
         while(in.ready()){
             char lookAhead = (char)in.read();
-            if(!isDigit(lookAhead)){
-                if (lookAhead == '.')
-                {
+            if(!isDigit(lookAhead) && lookAhead != '.'){
 
-                }
                 current = lookAhead;
                 readCurrent = false;
                 break;
             }
+            if (lookAhead == '.')
+            {
+                if (floatSighting)
+                {
+                    current = lookAhead;
+                    readCurrent = false;
+                    break;
+                }
+                floatSighting = true;
+            }
+            
             col++;
             sb.append(lookAhead);
         }
-        Token token = new Number(sb.toString(),r,c);
+
+        if (floatSighting){
+
+            Token token = new Float64(sb.toString(),r,c);
+            clearStringBuilder(sb);
+            return token;
+        }
+        
+        Token token = new Int32(sb.toString(),r,c);
         clearStringBuilder(sb);
         return token;
     }
@@ -328,11 +345,43 @@ class Number extends Token{
 
     @Override
     public String toString(){
-        return super.toString() + " Number (" + text + ")";
+        return super.toString();
     }
-
 }
 
+
+class Float64 extends Number{
+    public Float64(String s, int r, int c){
+        super(s,r,c);
+    }
+
+    @Override
+    public String toString(){
+        return super.toString() + " float64 (" + text + ")";
+    }
+}
+
+class Int32 extends Number{
+    public Int32(String s, int r, int c){
+        super(s,r,c);
+    }
+
+    @Override
+    public String toString(){
+        return super.toString() + " int32 (" + text + ")";
+    }
+}
+
+class Byte extends Number{
+    public Byte(String s, int r, int c){
+        super(s,r,c);
+    }
+
+    @Override
+    public String toString(){
+        return super.toString() + " byte (" + text + ")";
+    }
+}
 
 
 
