@@ -1,4 +1,7 @@
-package com;
+package com.AbstractSyntaxTree;
+
+import com.LexicalAnalysis.Lexer;
+import com.LexicalAnalysis.Token;
 
 import java.util.ArrayList;
 import java.util.Iterator;

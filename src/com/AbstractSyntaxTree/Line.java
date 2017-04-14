@@ -1,4 +1,6 @@
-package com;
+package com.AbstractSyntaxTree;
+
+import com.AbstractSyntaxTree.Statement;
 
 /**
  * Created by shayanraouf on 4/13/2017.

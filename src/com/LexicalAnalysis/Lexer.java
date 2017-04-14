@@ -5,7 +5,8 @@
   Lexer.java
  */
 
-package com;
+package com.LexicalAnalysis;
+
 import java.io.*;
 import java.util.*;
 
@@ -14,10 +15,9 @@ public class Lexer implements Iterable<Token>{
     private Set<String> reservedKeyWords;
     private Map<Integer,String> symbolTable;
     private Reader in;
-    private int row = 1;
-    private int col = 0;
+    private int row, col;
     private char current;
-    private boolean readCurrent = true;
+    private boolean readCurrent;
     private StringBuilder sb = new StringBuilder();
 
     public Lexer(String input){
@@ -26,6 +26,9 @@ public class Lexer implements Iterable<Token>{
             FileInputStream fis = new FileInputStream(input);
             InputStreamReader isr = new InputStreamReader(fis, "UTF8");
             in = new BufferedReader(isr);
+            row = 1;
+            col = 0;
+            readCurrent = true;
             initializeMap();
         }
         catch (IOException e) {
@@ -338,221 +341,3 @@ public class Lexer implements Iterable<Token>{
         reservedKeyWords.add("void");
     }
 }
-
-class Number extends Token{
-
-    public Number(String s, int r, int c){
-        super(s,r,c);
-    }
-
-    @Override
-    public String toString(){
-        return super.toString();
-    }
-}
-
-
-class Float64 extends Number{
-    public Float64(String s, int r, int c){
-        super(s,r,c);
-    }
-
-    @Override
-    public String toString(){
-        return super.toString() + " float64 (" + text + ")";
-    }
-}
-
-class Int32 extends Number{
-    public Int32(String s, int r, int c){
-        super(s,r,c);
-    }
-
-    @Override
-    public String toString(){
-        return super.toString() + " int32 (" + text + ")";
-    }
-}
-
-class Byte extends Number{
-    public Byte(String s, int r, int c){
-        super(s,r,c);
-    }
-
-    @Override
-    public String toString(){
-        return super.toString() + " byte (" + text + ")";
-    }
-}
-
-
-
-
-class Keyword extends Token{
-
-    public Keyword(String s, int r, int c){
-        super(s,r,c);
-    }
-
-    @Override
-    public String toString(){
-        return super.toString() + " Keyword (" + text + ")";
-    }
-
-}
-
-class Operator extends Token{
-
-    public Operator(String s, int r, int c){
-        super(s,r,c);
-
-
-    }
-
-    @Override
-    public String toString(){
-        return super.toString();
-    }
-
-    
-}
-
-class OperatorFactory{
-    public static Operator createOp(char ch, int r, int c){
-        Operator operator = null;
-
-        switch (ch){
-            case '+':
-                operator = new Addition(r,c);
-                break;
-            case '-':
-                operator = new Subtraction(r,c);
-                break;
-            case '*':
-                operator = new Multiplication(r,c);
-                break;
-            case '/':
-                operator = new Division(r,c);
-                break;
-            case '~':
-                operator = new BitwiseNot(r,c);
-                break;
-            case '^':
-                operator = new BitwiseXOR(r,c);
-                break;
-            default:
-                throw new IllegalArgumentException("Not an Operator");
-        }
-        return operator;
-    }
-}
-
-class Addition extends Operator{
-    public Addition(int r, int c){
-        super("+",r,c);
-    }
-}
-
-class Subtraction extends Operator{
-    public Subtraction(int r, int c){
-        super("-",r,c);
-    }
-}
-
-class Multiplication extends Operator{
-    public Multiplication(int r, int c){
-        super("*",r,c);
-    }
-}
-
-class Division extends Operator{
-    public Division(int r, int c){
-        super("/",r,c);
-    }
-}
-
-class BitwiseNot extends Operator{
-    public BitwiseNot(int r, int c){
-        super("~",r,c);
-    }
-}
-
-class BitwiseXOR extends Operator{
-    public BitwiseXOR(int r, int c){
-        super("^",r,c);
-    }
-}
-
-
-class Identifier extends Token{
-    public Identifier(String s,int r, int c){
-        super(s,r,c);
-    }
-
-    @Override
-    public String toString(){
-        return super.toString() + " IDENTIFIER (" + text + ")";
-    }
-
-
-}
-
-class Comma extends Token{
-    
-    public Comma( int r, int c){
-        super(",",r,c);
-    }
-}
-
-
-class SemiColon extends Token{
-
-    public SemiColon(int r, int c){
-        super(";",r,c);
-    }
-}
-
-
-class LeftParanthesis extends Token{
-    public LeftParanthesis(int r, int c){
-        super("(",r,c);
-    }
-
-}
-
-class RightParanthesis extends Token{
-
-    public RightParanthesis(int r, int c) {
-        super(")",r,c);
-    }
-}
-
-class LeftBracket extends Token{
-
-    public LeftBracket(int r, int c){
-        super("[",r,c);
-    }
-}
-
-class RightBracket extends Token{
-    
-    public RightBracket(int r, int c){
-        super("]",r,c);
-    }
-}
-
-
-class LeftBrace extends Token{
-
-    public LeftBrace(int r, int c){
-        super("{",r,c);
-    }
-}
-
-class RightBrace extends Token{
-    
-    public RightBrace(int r, int c){
-        super("}",r,c);
-    }
-}
-

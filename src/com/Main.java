@@ -7,6 +7,10 @@
 
 
 package com;
+
+import com.LexicalAnalysis.Lexer;
+import com.LexicalAnalysis.Token;
+
 import java.io.*;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -30,7 +34,7 @@ public class Main {
             token = it.next();
             if(token == null) continue;
 
-            if(token instanceof Statement){}
+           // if(token instanceof Statement){}
             System.out.println(token);
         }
     }

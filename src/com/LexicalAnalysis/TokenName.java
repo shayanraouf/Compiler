@@ -4,7 +4,7 @@
   CSS 448 - Compilers - Bernstein
   Lexer.java
  */
-package com;
+package com.LexicalAnalysis;
 import java.util.HashMap;
 import java.util.Map;
 

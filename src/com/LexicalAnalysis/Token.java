@@ -5,7 +5,7 @@
   Lexer.java
  */
 
-package com;
+package com.LexicalAnalysis;
 
 
 public class Token {
