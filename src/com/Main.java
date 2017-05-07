@@ -8,6 +8,8 @@
 
 package com;
 
+import com.AbstractSyntaxTree.AST;
+import com.AbstractSyntaxTree.Parser;
 import com.LexicalAnalysis.Lexer;
 import com.LexicalAnalysis.Token;
 
@@ -20,7 +22,16 @@ public class Main {
 	
         //new Main().run((String)args[0]);
 	  //new Main().run(args[0]);
-        new Main().run("tmp.txt");
+       // new Main().run("tmp.txt");
+       new Main().run2("tmp.txt");
+
+    }
+
+    public static void run2(String in){
+        Lexer lexer = new Lexer(in);
+        Parser parser = new Parser(lexer);
+        AST ast = parser.parse();
+        ast.display();
 
     }
 
@@ -32,7 +43,7 @@ public class Main {
         Token token;
         while(it.hasNext()){
             token = it.next();
-            if(token == null) continue;
+            //if(token == null) continue;
 
            // if(token instanceof Statement){}
             System.out.println(token);

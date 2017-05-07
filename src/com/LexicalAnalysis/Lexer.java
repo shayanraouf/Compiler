@@ -54,6 +54,9 @@ public class Lexer implements Iterable<Token>{
             public Token next(){
                 try{
                     Token token = getToken();
+                    while(in.ready() && token == null){
+                        token = getToken();
+                    }
                     return token;
                 }
                 catch (IOException e){
