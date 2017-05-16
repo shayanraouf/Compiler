@@ -1,12 +1,8 @@
 package com.AbstractSyntaxTree;
 
 import com.LexicalAnalysis.*;
-import com.LexicalAnalysis.Number;
-import com.sun.xml.internal.bind.v2.TODO;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by shayanraouf on 4/13/2017.
@@ -14,6 +10,7 @@ import java.util.List;
 public class Parser {
     private Iterator<Token> tokenizer;
     private Token token;
+
     public Parser(Lexer lexer){
         this.tokenizer = lexer.iterator();
         this.token = null;
@@ -26,27 +23,10 @@ public class Parser {
     public AST parse(){
         List<Line> lines = new ArrayList<>();
 
-//        Iterator<Token> it = lexer.iterator();
-//        Token token;
-//        while(it.hasNext()){
-//            token = it.next();
-//            if(token == null) continue;
-//
-//            // if(token instanceof Statement){}
-//            System.out.println(token);
-//        }
-
         while(tokenizer.hasNext()){
             readToken();
-            //if(token == null) continue;
-            //System.out.println(token);
-
-             Line get = getNextLine();
-             lines.add(get);
-//            if(get != null){
-//                lines.add(get);
-//            }
-
+            Line get = getNextLine();
+            lines.add(get);
         }
         return new AST(lines);
     }
@@ -56,7 +36,6 @@ public class Parser {
         if(token == null) return null;
         int row = token.getRow();
         Statement statement = getNextStatement();
-
         return new Line(row,statement);
     }
 
@@ -68,27 +47,94 @@ public class Parser {
             case "for": return getNextForStatement();
             case "if": return getNextIfStatement();
             case "while": return getNextWhileStatement();
+            case "print": return getNextPrintStatement();
+            case "return": return getNextReturnStatement();
             default:
                 break;
         }
         return null;
     }
 
+    private ReturnStatement getNextReturnStatement() {
+        return new ReturnStatement(getNextExpression());
+    }
+
+    private PrintStatement getNextPrintStatement() {
+        PrintStatement printStatement = new PrintStatement("--print statement test--");
+        return printStatement;
+    }
 
 
-    // TODO
+
     private ForStatement getNextForStatement() {
-        readToken(); // read open paren
+        readToken(); // read open paren for begin of for loop '('
         Expression expr1 = getNextExpression();
         Expression expr2 = getNextExpression();
         Expression expr3 = getNextExpression();
         BlockStatement statement = getNextBlockStatement();
-
+        //readToken(); // read close paren
         return new ForStatement(expr1,expr2,expr3,statement);
     }
 
+    private boolean match(Token t){
+        return token.equals(t);
+    }
+
+    private Expression getNextExpression() {
+
+        readToken(); // read first term
+        Expression root = expr();
+        return null;
+    }
+
+    private Expression expr(){
+
+        while(tokenizer.hasNext() && !(token instanceof SemiColon)){
+
+            readToken();
+        }
+        return null;
+    }
+
+
+
+    private Expression factor(){
+        return null;
+    }
+
+
+//    def factor(tokens):
+//            if match(tokens,'('):
+//    result = expr(tokens)
+//        if not match(tokens, ')'):
+//    raise ParseError('expecting ")"')
+//        return result
+//    return literal(tokens)
+//
+//    def term(tokens):
+//    result = factor(tokens)
+//    while len(tokens) > 0:
+//            if  match(tokens, '*'):
+//    result *= factor(tokens)
+//    elif match(tokens, '/'):
+//    result /= factor(tokens)
+//        else:
+//                return result
+//    return result
+
+
+//    def expr(tokens):
+//    result = term(tokens)
+//    while len(tokens) > 0:
+//            if match(tokens, '+'):
+//    result += term(tokens)
+//    elif match(tokens, '-'):
+//    result -= term(tokens)
+//        else:
+//                return result
+//    return result
     private BlockStatement getNextBlockStatement(){
-        readToken(); // read open paren
+        readToken(); // read open curly brace
         Statement statement = getNextStatement();
         BlockStatement blockStatement = new BlockStatement(statement);
         readToken();
@@ -152,34 +198,54 @@ public class Parser {
         return null;
     }
 
-    private Expression getNextExpression(){
-        readToken();
-        Expression expr = expression();
-        readToken();
-        while(tokenizer.hasNext() && token instanceof Comma) {
-            expr.addExpression(expression());
-            readToken();
+//    private Expression getNextExpression(){
+//        readToken(); // actual thing
+//        //int i = 0;
+//        Expression expr = expression();
+//        //readToken(); // semicolon
+////        while(tokenizer.hasNext() && token instanceof Comma) {
+////            readToken();
+////            expr.addExpression(expression());
+////            readToken();
+////        }
+//        //if(tokenizer.hasNext()) readToken();
+//        return expr;
+//    }
+
+
+
+    private Expression parsedExpression(List<Token> expressionList) {
+//        for(Token t: expressionList){
+//            System.out.print(t + "--");
+//        }
+        System.out.println();
+        List<Token> left = new ArrayList<>();
+        List<Token> right = new ArrayList<>();
+
+        int i = 0;
+        while(i < expressionList.size() && !expressionList.get(i).getType().equals("=")){
+            left.add(expressionList.get(i));
+            i++;
         }
-        if(tokenizer.hasNext()) readToken();
-        return expr;
-    }
 
-    private Expression expression() {
-        Expression expression = null;
-        if(token instanceof Number){ // number ::= character-literal | integer-literal | float-literal
-
-            if(token instanceof Int32){ // integer-literal
-
-            }
-            else if(token instanceof Float64){ //float-literal
-
-            }
-            // character-literal ??
-
+        i++;
+        while(i < expressionList.size()){
+            right.add(expressionList.get(i));
+            i++;
         }
-        else if(token instanceof Identifier){ // function-call | variable
 
-        }
+
+//
+//        for(Token t: left){
+//            System.out.print(t + " ");
+//        }
+//
+//        System.out.println();
+//
+//        for(Token t: right){
+//            System.out.print(t + " ");
+//        }
+
         return null;
     }
 
