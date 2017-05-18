@@ -6,6 +6,8 @@ package com.AST;
 
 
 import com.LexicalAnalysis.*;
+import com.LexicalAnalysis.Byte;
+import com.LexicalAnalysis.Number;
 
 import java.util.*;
 public class AST {
@@ -119,6 +121,74 @@ public class AST {
         }
         return null;
     }
+    //function foo(n int32){}
+    //function foo(ref n int32){}
+    //function foo(ref const n int32){}
+    private AST parameter(){
+        ExprNode param = new Node(new Token("parameter"));
+        if(isMatch(currentToken,"ref")){
+            param.addChild(new Node(currentToken));
+            readToken();
+        }
+
+        if(isMatch(currentToken,"const")){
+            param.addChild(new Node(currentToken));
+            readToken();
+        }
+
+        //if(!isMatch(currentToken,"id")) System.err.println("Expected identifier, Found: " + currentToken);
+
+        param.addChild(new Node(currentToken)); // add the identifier
+        readToken();
+
+        param.addChild(nonArrayTypeDescriptor());
+        return param;
+    }
+
+    private AST getParameters(){
+        ExprNode parameters = new Node(new Token("Parameter(s)"));
+        while(hasNext()){
+            parameters.addChild(parameter());
+            //System.out.println(nextToken);
+            if(isMatch(nextToken,",")){
+                readToken();
+                readToken();
+            }
+            if(isMatch(currentToken,")") || isMatch(nextToken,")")) break;
+        }
+        //readToken();
+        return parameters;
+    }
+
+    private AST nonArrayTypeDescriptor(){
+        ExprNode nonArrayTypeDescriptor = null;
+
+        if(isMatch(currentToken,"keyword")){
+            nonArrayTypeDescriptor = new IntNode(currentToken);
+        }
+        else if(isMatch(currentToken,"record-descriptor")){
+
+        }
+        else if(isMatch(currentToken,"id")){
+
+        }
+        return nonArrayTypeDescriptor;
+    }
+
+    private AST dimension(){
+        AST dimension = new AST(new Token("dimension"));
+        dimension.addChild(getMultipleExpressions());
+        return dimension;
+    }
+
+    private AST getMultipleExpressions(){
+        AST expressions = new AST(new Token("Expressions"));
+        while(hasNext() && !isMatch(currentToken,",") && !isMatch(currentToken,"]")){
+            expressions.addChild(generateExpression());
+            readToken();
+        }
+        return expressions;
+    }
     private AST getNextFunction() {
         AST function = new AST(currentToken);
         if(!isMatch(nextToken,"id")) System.err.println("Expected identifier, Found: " + nextToken);
@@ -129,12 +199,14 @@ public class AST {
         if(!isMatch(nextToken,"("))System.err.println("Expected '(' , Found: " + nextToken);
 
         readToken(); // get next
-
-        if(!isMatch(nextToken,")"))System.err.println("Expected ')' , Found: " + nextToken);
-        // TODO: read in params
+        if(!isMatch(nextToken,")")){ // we have parameter(s)
+            readToken();
+            function.addChild(getParameters());
+        }
 
         readToken(); // get next
-        if(!isMatch(nextToken,"{"))System.err.println("Expected '{' , Found: " + nextToken);
+        //if(!isMatch(currentToken,")"))System.err.println("Expected ')' , Found: " + currentToken);
+        //if(!isMatch(nextToken,"{"))System.err.println("Expected '{' , Found: " + nextToken);
 
         readToken(); // get next
         readToken(); // get next
@@ -145,18 +217,6 @@ public class AST {
 
     private ExprNode generateBlockStatement(){
         ExprNode blockStatement = new Node(new Token("BlockStatement"));
-
-
-//        if(isMatch(nextToken,"}")){ // is close?
-//
-//            if(!stack.isEmpty()){ // is it empty?
-//                stack.pop();
-//                if(stack.isEmpty()) return blockStatement;
-//            }
-//        }
-//        AST nextTree = getNextTree();
-//        if(nextTree == null) return blockStatement;
-//        blockStatement.addChild(nextTree);
 
         while(hasNext() && nextToken != null){
             if(isMatch(currentToken, "}") || isMatch(nextToken,"}")){ // is close?
@@ -192,27 +252,41 @@ public class AST {
 
     private AST getNextForStatement() {
         AST forStatement = new AST(currentToken); // parent token -> for
-        readToken(); // open paren '('
+        if(!isMatch(nextToken,"("))System.err.println("Expected '(' , Found: " + nextToken);
+        ExprNode expr1 = null;
+        ExprNode expr2 = null;
+        ExprNode expr3 = null;
 
+        readToken(); // curr  = '(' , next = 'expr' or ";"
         readToken();
-        ExprNode expr1 = isMatch(currentToken,";") ? null: generateExpression();
+
+        if(isMatch(currentToken,"id")){
+            expr1 = generateExpression();
+        }
+
+        readToken(); // curr = 'expr' or ";"
+        readToken();
+
+        if(isMatch(currentToken,"id")){
+            expr2 = generateExpression();
+        }
+
+        readToken(); // curr = ; , next = 'expr' or ";"
+        readToken(); // curr = 'expr' or ";"
+
+        if(isMatch(currentToken,"id")){
+            expr3 = generateExpression();
+        }
+
         forStatement.addChild(expr1);
-        readToken();
-        ExprNode expr2 = isMatch(currentToken,";") ? null: generateExpression();
         forStatement.addChild(expr2);
-
-        readToken();
-        ExprNode expr3 = isMatch(currentToken,")") ? null: generateExpression();
-
         forStatement.addChild(expr3);
 
-        readToken(); // open curly
-
-        //readToken(); // read first token for block statement
-
         stack.push('{');
+        readToken(); // curr = ; , next = 'expr' or ";"
+        readToken(); // curr = 'expr' or ";"
+        readToken(); // curr = 'expr' or ";"
         forStatement.addChild(generateBlockStatement());
-        System.out.println(currentToken);
         return forStatement;
     }
 
@@ -233,10 +307,10 @@ public class AST {
                 root = new AddNode(idNode,assignment,right);
                 return root;
             }
-            else if(isMatch(currentToken,"op")){
-                Token operator = currentToken;
+            else if(isMatch(nextToken,"op")){
+                Token operator = nextToken;
                 readToken();
-
+                readToken();
                 root = new AddNode(idNode,operator,generateExpression());
                 return root;
 
@@ -268,6 +342,9 @@ public class AST {
 
     private boolean isMatch(Token token, String s){
         switch (s){
+            case ",": return token instanceof Comma;
+            case "[": return token instanceof LeftBracket;
+            case "]": return token instanceof RightBracket;
             case "}": return token instanceof RightBrace;
             case "{": return token instanceof LeftBrace;
             case "(": return token instanceof LeftParanthesis;
@@ -276,8 +353,14 @@ public class AST {
             case "var": return token instanceof Keyword;
             case "id": return token instanceof Identifier;
             case "=": return token.getType().equals("=");
+            case "ref": return token.getType().equals("ref");
+            case "const": return token.getType().equals("const");
+            case "basic-type": return token instanceof Number;
             case "int32": return token instanceof Int32;
+            case "float64": return token instanceof Float64;
+            case "byte": return token instanceof Byte;
             case "op": return token instanceof Operator;
+            case "keyword": return token instanceof Keyword;
         }
         return false;
     }
