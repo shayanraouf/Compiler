@@ -146,18 +146,6 @@ public class AST {
     private ExprNode generateBlockStatement(){
         ExprNode blockStatement = new Node(new Token("BlockStatement"));
 
-
-//        if(isMatch(nextToken,"}")){ // is close?
-//
-//            if(!stack.isEmpty()){ // is it empty?
-//                stack.pop();
-//                if(stack.isEmpty()) return blockStatement;
-//            }
-//        }
-//        AST nextTree = getNextTree();
-//        if(nextTree == null) return blockStatement;
-//        blockStatement.addChild(nextTree);
-
         while(hasNext() && nextToken != null){
             if(isMatch(currentToken, "}") || isMatch(nextToken,"}")){ // is close?
                 if(!stack.isEmpty()){ // is it empty?
@@ -192,27 +180,41 @@ public class AST {
 
     private AST getNextForStatement() {
         AST forStatement = new AST(currentToken); // parent token -> for
-        readToken(); // open paren '('
+        if(!isMatch(nextToken,"("))System.err.println("Expected '(' , Found: " + nextToken);
+        ExprNode expr1 = null;
+        ExprNode expr2 = null;
+        ExprNode expr3 = null;
 
+        readToken(); // curr  = '(' , next = 'expr' or ";"
         readToken();
-        ExprNode expr1 = isMatch(currentToken,";") ? null: generateExpression();
+
+        if(isMatch(currentToken,"id")){
+            expr1 = generateExpression();
+        }
+
+        readToken(); // curr = 'expr' or ";"
+        readToken();
+
+        if(isMatch(currentToken,"id")){
+            expr2 = generateExpression();
+        }
+
+        readToken(); // curr = ; , next = 'expr' or ";"
+        readToken(); // curr = 'expr' or ";"
+
+        if(isMatch(currentToken,"id")){
+            expr3 = generateExpression();
+        }
+
         forStatement.addChild(expr1);
-        readToken();
-        ExprNode expr2 = isMatch(currentToken,";") ? null: generateExpression();
         forStatement.addChild(expr2);
-
-        readToken();
-        ExprNode expr3 = isMatch(currentToken,")") ? null: generateExpression();
-
         forStatement.addChild(expr3);
 
-        readToken(); // open curly
-
-        //readToken(); // read first token for block statement
-
         stack.push('{');
+        readToken(); // curr = ; , next = 'expr' or ";"
+        readToken(); // curr = 'expr' or ";"
+        readToken(); // curr = 'expr' or ";"
         forStatement.addChild(generateBlockStatement());
-        System.out.println(currentToken);
         return forStatement;
     }
 
@@ -233,10 +235,10 @@ public class AST {
                 root = new AddNode(idNode,assignment,right);
                 return root;
             }
-            else if(isMatch(currentToken,"op")){
-                Token operator = currentToken;
+            else if(isMatch(nextToken,"op")){
+                Token operator = nextToken;
                 readToken();
-
+                readToken();
                 root = new AddNode(idNode,operator,generateExpression());
                 return root;
 
