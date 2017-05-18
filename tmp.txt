@@ -1,41 +1,14 @@
-function foo1(n int32,k int32,m int32){
-
-    function foo2(n int32,k int32,m int32){
-
-            function foo3(n int32,k int32,m int32){
-
-                function foo4(n int32,k int32,m int32){
-
-                    function foo5(n int32,k int32,m int32){
-
-                            function foo6(n int32,k int32,m int32){
-
-                                for(i = 4; i < 2; i = i + 1){
-
-                                }
-                            }
-
-                            for(i = 4; i < 2; i = i + 1){
-
-                            }
-                    }
-
-                    for(i = 4; i < 2; i = i + 1){
-
-                    }
-                }
-                    for(i = 4; i < 2; i = i + 1){
-
-                    }
-            }
-            for(i = 4; i < 2; i = i + 1){
-
-            }
+function foo(){
+    var foo = 3;
+    var foo = 3;
+    var foo = 3;
+    function foo(){
+        var foo = 3;
+        var foo = 3;
+        var foo = 3;
     }
-    for(i = 4; i < 2; i = i + 1){
 
-    }
-}
-function foo1(){
-
+        var foo = 3;
+        var foo = 3;
+        var foo = 3;
 }
