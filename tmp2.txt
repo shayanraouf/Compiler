@@ -1,0 +1,39 @@
+function foo1(){
+    function foo2(){
+        function foo3(){
+            function foo4(){
+                bar1 = 1
+                bar1 = 1
+                bar1 = 1
+                bar1 = 1
+                            function foo4(){
+                                bar1 = 1
+                                bar1 = 1
+                                bar1 = 1
+                                bar1 = 1
+                                for(i = 4; i < 2; i = i + 1){
+                                    for(i = 4; i < 2; i = i + 1){
+                                        for(i = 4; i < 2; i = i + 1){
+                                            for(i = 4; i < 2; i = i + 1){
+
+                                            }
+                                            for(i = 4; i < 2; i = i + 1){
+
+                                            }
+                                        }
+                                            for(i = 4; i < 2; i = i + 1){
+
+                                            }
+                                    }
+                                             for(i = 4; i < 2; i = i + 1){
+
+                                             }
+                                }
+                            }
+            }
+            bar1 = 1
+        }
+         bar1 = 1
+    }
+    bar1 = 1
+}

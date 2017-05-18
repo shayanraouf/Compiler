@@ -50,6 +50,7 @@ public class Token {
     public String toString(){
         String name = TokenName.names.get(text);
         if(name != null){
+            if(row == 0 && col == 0) return TokenName.names.get(text);
             return "[" + row + "," + col + "]" + " " + TokenName.names.get(text);
         }
         else{
