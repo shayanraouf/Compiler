@@ -40,9 +40,25 @@ public class TokenName {
         put("|","BITWISE_OR");
         put("||","LOGICAL_OR");
         put("^","BITWISE_XOR");
-        put("BlockStatement","BlockStatement");
-        put("Parameter(s)","Parameter(s)");
+        put("block-statement","block-statement");
+        put("parameter(s)","parameter(s)");
         put("parameter","parameter");
+        put("else-statement","else-statement");
+
+        put("expression(s)","expression(s)");
+        put("dimension","dimension");
+        put("variable-declaration","variable-declaration");
+        put("non-array-type-descriptor","non-array-type-descriptor");
+        put("type-descriptor","type-descriptor");
+        put("type-declaration","type-declaration");
+        put("field-declaration","field-declaration");
+        put("field-declarations","field-declarations");
+        put("record-descriptor","record-descriptor");
+        put("type-cast","type-cast");
+        put("subscript","subscript");
+        put("function-call","function-call");
+        put("return-statement","return-statement");
+        put("print-statement","print-statement");
 
 
     }};
