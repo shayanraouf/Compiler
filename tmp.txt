@@ -1,16 +1,38 @@
-function fib1(){
-  /*var curr = 1;
-  var prev = 0;
-  while ((n = n - 1) > 0) {
-    var swap = curr;
-    prev = curr;
-    curr = prev + swap;
-  }*/
-  //return 2
-  function fib2(){
-       function fib3(){
-       }
-  }
+function foo1(){
+    function foo2(){
+        function foo3(){
+            function foo4(){
+                bar1 = 1
+                bar1 = 1
+                bar1 = 1
+                bar1 = 1
+                            function foo4(){
+                                bar1 = 1
+                                bar1 = 1
+                                bar1 = 1
+                                bar1 = 1
+                            }
+            }
+            bar1 = 1
+        }
+         bar1 = 1
+    }
+             bar1 = 1
 }
-function fib3(){
+function foo1(){
+function foo1(){
+function foo1(){
+function foo1(){
+function foo1(){
+
+}
+}
+}
+}
+}
+function foo1(){
+
+}
+function foo1(){
+
 }

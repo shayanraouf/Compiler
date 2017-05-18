@@ -21,4 +21,10 @@ public class Function extends DeclStatement{
         this.statements = statements;
     }
 
+    @Override
+    public String toString() {
+        return "Function{" +
+                "functionName='" + functionName + '\'' +
+                '}';
+    }
 }

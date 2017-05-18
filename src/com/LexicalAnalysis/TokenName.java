@@ -40,5 +40,6 @@ public class TokenName {
         put("|","BITWISE_OR");
         put("||","LOGICAL_OR");
         put("^","BITWISE_XOR");
+        put("BlockStatement","BlockStatement");
     }};
 }

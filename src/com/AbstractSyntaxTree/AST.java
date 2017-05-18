@@ -11,8 +11,8 @@ public class AST {
 
     public void display(){
         for(Line line: lines){
-            display2(line.getStatement());
-            //System.out.println(line.getNumber());
+            //display2(line.getStatement());
+            System.out.println(line);
         }
     }
 
@@ -30,8 +30,9 @@ public class AST {
 
     public void displayFunction(Function func){
         if(func == null) return;
-        System.out.println("(" + func.row + ", " + func.col +  ") function declaration");
-        System.out.println(func.functionName);
+        System.out.println(func);
+        //System.out.println("(" + func.row + ", " + func.col +  ") function declaration");
+        //System.out.println(func.functionName);
         Statement statement = func.statements;
         if(statement instanceof Function){
             displayFunction((Function)statement);
