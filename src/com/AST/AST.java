@@ -10,17 +10,19 @@ import com.LexicalAnalysis.*;
 import java.util.*;
 public class AST {
     Iterator<Token> iterator;
-    Token token;
+    Token currentToken;
+    Token nextToken;
     List<AST> children = new ArrayList<>();
     Stack<Character> stack = new Stack<>();
     public AST(Lexer lexer){
         iterator = lexer.iterator();
-        token = null;
+        currentToken = null;
+        nextToken = iterator.next();
     }
     public AST()              { ; }
-    public AST(Token t)       { token = t; }
+    public AST(Token t)       { currentToken = t; }
 
-    public AST(int tokenType) { this.token = new Token(tokenType); }
+    public AST(int tokenType) { this.currentToken = new Token(tokenType); }
 
     public void parse(){
         while(hasNext()){
@@ -38,7 +40,7 @@ public class AST {
         print(level);
         for(AST element: treeNode.children){
             if(element != null){
-                System.out.println(element.token);
+                System.out.println(element.currentToken);
                 print(level);
             }
             display(element, level + 1, level2 + 1);
@@ -62,8 +64,8 @@ public class AST {
 //
 //        System.out.println(children.get(1).token);
 //        System.out.println(children.get(1).children.get(0).token);
-        System.out.println(children.size());
-        System.out.println(children.get(0).token);
+         System.out.println("Size of Tree " + children.size());
+//        System.out.println(children.get(0).token);
         //System.out.println(children.get(1).token);
         for (AST tree : children) {
             //System.out.println(tree);
@@ -75,7 +77,7 @@ public class AST {
 
             if(treeNode != null){
                 print(level);
-                System.out.println(treeNode.token);
+                System.out.println(treeNode.currentToken);
 
                 for(AST child: treeNode.children){
                     display2(child, level + 1);
@@ -88,16 +90,22 @@ public class AST {
 
 
     private AST getNextTree() {
-        if(token == null) return null;
-        if(isMatch("id")){
+        if(currentToken == null) return null;
+        if(isMatch(currentToken,"id")){
             return generateExpression();
         }
 
-        if(isMatch("}")){
-            readToken();
+        if(isMatch(currentToken, "}")){
+            if(!stack.isEmpty()){ // is it empty?
+                if(stack.peek() == '{'){
+                    stack.pop();
+                    //if(stack.isEmpty())
+                }
+            }
+            //readToken();
         }
-
-        String keyword = token.getType();
+        if(currentToken == null) return null;
+        String keyword = currentToken.getType();
 
         switch(keyword){
             case "while": return getNextWhileStatement();
@@ -112,23 +120,64 @@ public class AST {
         return null;
     }
     private AST getNextFunction() {
-        AST function = new AST(token);
-        readToken(); // reads identifier
-        function.addChild(new Node(token));
-        readToken(); // read open paren
+        AST function = new AST(currentToken);
+        if(!isMatch(nextToken,"id")) System.err.println("Expected identifier, Found: " + nextToken);
 
-        // read in params
-        readToken(); // read close paren
-        readToken(); // read open curly
+        readToken();
+        function.addChild(new Node(currentToken)); // save function identifier
+
+        if(!isMatch(nextToken,"("))System.err.println("Expected '(' , Found: " + nextToken);
+
+        readToken(); // get next
+
+        if(!isMatch(nextToken,")"))System.err.println("Expected ')' , Found: " + nextToken);
+        // TODO: read in params
+
+        readToken(); // get next
+        if(!isMatch(nextToken,"{"))System.err.println("Expected '{' , Found: " + nextToken);
+
+        readToken(); // get next
+        readToken(); // get next
         stack.push('{');
-        //readToken();
         function.addChild(generateBlockStatement());
         return function;
     }
 
+    private ExprNode generateBlockStatement(){
+        ExprNode blockStatement = new Node(new Token("BlockStatement"));
+
+
+//        if(isMatch(nextToken,"}")){ // is close?
+//
+//            if(!stack.isEmpty()){ // is it empty?
+//                stack.pop();
+//                if(stack.isEmpty()) return blockStatement;
+//            }
+//        }
+//        AST nextTree = getNextTree();
+//        if(nextTree == null) return blockStatement;
+//        blockStatement.addChild(nextTree);
+
+        while(hasNext() && nextToken != null){
+            if(isMatch(currentToken, "}") || isMatch(nextToken,"}")){ // is close?
+                if(!stack.isEmpty()){ // is it empty?
+                    if(stack.peek() == '{'){
+                        stack.pop();
+                        if(stack.isEmpty()) break;
+                    }
+                }
+            }
+
+            AST nextTree = getNextTree();
+            if(nextTree == null) break;
+            readToken();
+            blockStatement.addChild(nextTree);
+        }
+        return blockStatement;
+    }
 
     private AST getNextWhileStatement(){
-        AST whileStatement = new AST(token);
+        AST whileStatement = new AST(currentToken);
 
         readToken(); // read open '('
 
@@ -142,18 +191,18 @@ public class AST {
     }
 
     private AST getNextForStatement() {
-        AST forStatement = new AST(token); // parent token -> for
+        AST forStatement = new AST(currentToken); // parent token -> for
         readToken(); // open paren '('
 
         readToken();
-        ExprNode expr1 = isMatch(";") ? null: generateExpression();
+        ExprNode expr1 = isMatch(currentToken,";") ? null: generateExpression();
         forStatement.addChild(expr1);
         readToken();
-        ExprNode expr2 = isMatch(";") ? null: generateExpression();
+        ExprNode expr2 = isMatch(currentToken,";") ? null: generateExpression();
         forStatement.addChild(expr2);
 
         readToken();
-        ExprNode expr3 = isMatch(")") ? null: generateExpression();
+        ExprNode expr3 = isMatch(currentToken,")") ? null: generateExpression();
 
         forStatement.addChild(expr3);
 
@@ -163,53 +212,36 @@ public class AST {
 
         stack.push('{');
         forStatement.addChild(generateBlockStatement());
+        System.out.println(currentToken);
         return forStatement;
     }
 
-    private ExprNode generateBlockStatement(){
-        ExprNode blockStatement = new Node(new Token("BlockStatement"));
-        readToken();
-        while(hasNext() && token != null){
-            if(isMatch("}")){ // is close?
 
-                if(!stack.isEmpty()){ // is it empty?
-                    if(stack.peek() == '{'){
-                        stack.pop();
-                        if(stack.isEmpty()) break;
-                    }
-                }
-            }
-
-            AST nextTree = getNextTree();
-            if(nextTree == null) break;
-            blockStatement.addChild(nextTree);
-        }
-        return blockStatement;
-    }
 
 //foo(4)
     private ExprNode generateExpression(){
-        ExprNode root;
-        if(isMatch("id")){
-            ExprNode idNode = new Node(token);
-            readToken();
 
-            if(isMatch("=")){
-                Token assignment = token;
+        ExprNode root;
+        if(isMatch(currentToken,"id")){
+            ExprNode idNode = new Node(currentToken);
+
+            if(isMatch(nextToken,"=")){
+                Token assignment = nextToken;
+                readToken();
                 readToken();
                 ExprNode right = generateExpression();
                 root = new AddNode(idNode,assignment,right);
                 return root;
             }
-            else if(isMatch("op")){
-                Token operator = token;
+            else if(isMatch(currentToken,"op")){
+                Token operator = currentToken;
                 readToken();
 
                 root = new AddNode(idNode,operator,generateExpression());
                 return root;
 
             }
-            else if(isMatch("(")){
+            else if(isMatch(currentToken,"(")){
                 readToken();
                 ExprNode param = generateExpression();
                 if(param != null){
@@ -219,11 +251,10 @@ public class AST {
                 return idNode;
             }
         }
-        else if(isMatch("int32")){
-            ExprNode num = new IntNode(token);
-            readToken();
-            if(isMatch("op")){
-                Token operator = token;
+        else if(isMatch(currentToken,"int32")){
+            ExprNode num = new IntNode(currentToken);
+            if(isMatch(nextToken,"op")){
+                Token operator = currentToken;
                 readToken();
                 ExprNode nextExpre = generateExpression();
                 return new AddNode(num, operator,nextExpre);
@@ -235,7 +266,7 @@ public class AST {
         return null;
     }
 
-    private boolean isMatch(String s){
+    private boolean isMatch(Token token, String s){
         switch (s){
             case "}": return token instanceof RightBrace;
             case "{": return token instanceof LeftBrace;
@@ -273,10 +304,11 @@ public class AST {
 
 
 
-    public int getNodeType()  { return token.type; }
+    public int getNodeType()  { return currentToken.type; }
 
     private void readToken(){
-        token = iterator.next();
+        currentToken = nextToken;
+        nextToken = iterator.next();
     }
 
     private boolean hasNext(){
@@ -287,10 +319,10 @@ public class AST {
         if ( children==null ) children = new ArrayList<AST>();
         children.add(t);
     }
-    public boolean isNil()    { return token==null; }
+    public boolean isNil()    { return currentToken==null; }
 
 
-    public String toString() { return token.toString(); }
+    public String toString() { return currentToken.toString(); }
 
 
     public String toStringTree() {

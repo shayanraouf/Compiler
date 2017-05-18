@@ -1,69 +1,38 @@
-/*function fib1(){
-  var curr = 1;
-  var prev = 0;
-  while ((n = n - 1) > 0) {
-    var swap = curr;
-    prev = curr;
-    curr = prev + swap;
-  }
-  //return 2
-  function fib2(){
-       function fib3(){
-       }
-  }
-}
-function fib3(){
-    for(int i = 0; i < 5; i += 1){
-
-    }
-}
-for(foo(3 * 6); j < 23; v = v + 1){
-       i = 2
-       name = 3 * 4
-}
-*/
-
-/*function fib1(){
-    function fib2(){
-        function fib3(){
-            function fib4(){
-                function fib5(){
-                        for(i = 9 * 4; i < n; i = i + 1){
-                            name = 44
-
-                        }
-                }
-             }
+function foo1(){
+    function foo2(){
+        function foo3(){
+            function foo4(){
+                bar1 = 1
+                bar1 = 1
+                bar1 = 1
+                bar1 = 1
+                            function foo4(){
+                                bar1 = 1
+                                bar1 = 1
+                                bar1 = 1
+                                bar1 = 1
+                            }
+            }
+            bar1 = 1
         }
+         bar1 = 1
     }
- }*/
-
-/*while(i < 4){
-     while(i < 5){
-         while(i < 5){
-
-         }
-     }
- }*/
-function fib5(){
-    for(i = 9 * 4; i < n; i = i + 1){
-        while(i < 4){
-             while(i < 5){
-                 while(i < 5){
-                    name = 23 * 4
-                 }
-             }
-             m = 9 * 23
-         }
-         d = 3
-    }
+             bar1 = 1
 }
-while(i < 4){
-     while(i < 5){
-         while(i < 5){
+function foo1(){
+function foo1(){
+function foo1(){
+function foo1(){
+function foo1(){
 
-         }
-         john = 902 * 3
-     }
-     sds = 23
- }
+}
+}
+}
+}
+}
+function foo1(){
+
+}
+function foo1(){
+
+}
