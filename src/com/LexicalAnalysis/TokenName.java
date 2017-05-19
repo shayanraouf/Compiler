@@ -25,14 +25,14 @@ public class TokenName {
         put("*","MULTIPLICATION");
         put("/","DIVISON");
         put("=","ASSIGNMENT_OPERATOR");
-        put("==", "EQUALTO");
-        put("!=","NOT_EQUALTO_ASSIGNMENT_OPERATOR");
+        put("==", "EQUAL_EQUAL");
+        put("!=","NOT_EQUAL_TO");
         put(">","GREATER_THAN_OPERATOR");
         put(">>","IN_STREAM");
         put("<<","OUT_STREAM");
-        put(">=","GREATER_THAN_EQUALTO_OPERATOR");
+        put(">=","GREATER_THAN_EQUALTO");
         put("<","LESS_THAN_OPERATOR");
-        put("<=","LESS_THAN_EQUALTO_OPERATOR");
+        put("<=","LESS_THAN_EQUALTO");
         put("!", "NOT_EQUALTO");
         put("~","BITWISE_NOT");
         put("&","BITWISE_AND");

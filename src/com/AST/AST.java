@@ -341,44 +341,51 @@ public class AST {
      */
     private ExprNode expression(){
         ExprNode expr;   // tree
-        expr = E();
-        if(isMatch(currentToken, ";")){
-            return expr;
-        }
-        return null;
+        expr = equals();
+        return expr;
     }
-
+    private ExprNode equals(){
+        ExprNode expr;
+        expr = E();
+        while (isMatch(currentToken, "=")|| (isMatch(currentToken, "!=")) || (isMatch(currentToken, "=="))){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = E();
+            expr = new AddNode(expr, op, expr1);
+        }
+        return expr;
+    }
     private ExprNode E(){
-        ExprNode expr;   //AST tree;
-        expr = T();      // tree = T();
-        while (isMatch(currentToken, "op")){// || isMatch(currentToken, "-")){
+        ExprNode expr;
+        expr = T();
+        while (isMatch(currentToken, "+")|| isMatch(currentToken, "-")){
             Token op = currentToken;
             readToken();
             ExprNode expr1 = T();
-            return new AddNode(expr, op, expr1);
+            expr = new AddNode(expr, op, expr1);
         }
         return expr;
     }
 
     private ExprNode T(){
-        ExprNode expr;   //AST tree;
-        expr = F();      // tree = F();
+        ExprNode expr;
+        expr = F();
         while (isMatch(currentToken, "*") || isMatch(currentToken, "/")){
             Token op = currentToken;
             readToken();
-            ExprNode expr1 = F();   //AST tree1 = F();
-            return new AddNode(expr, op, expr1);
+            ExprNode expr1 = F();
+            expr = new AddNode(expr, op, expr1);
         }
         return expr;
     }
 
     private ExprNode F(){
-        ExprNode expr;   //AST tree;
-        expr = P();      // tree = P();
+        ExprNode expr;
+        expr = P();
         if (isMatch(currentToken, "^")){
             Token op = currentToken;
             readToken();
-            ExprNode expr1 = F();   //AST tree1 = F();
+            ExprNode expr1 = F();
             return new AddNode(expr, op, expr1);
         }
         else
@@ -391,17 +398,17 @@ public class AST {
             Token v = currentToken;
             readToken();
             expr = new Node(v);
-            return expr;  //tree;
+            return expr;
         }
         else if (isMatch(currentToken, "(")){   // open paren
             readToken();
-            expr = E();    //tree = E();
+            expr = E();
             expect(")");
-            return expr;   //tree;
+            return expr;
         }
         else if(isUnary(currentToken)){     // unary operator
             readToken();
-            expr = F();   //tree = F();
+            expr = F();
             return null;
         }
         else {
@@ -783,7 +790,13 @@ private ExprNode expression(){
             case ")": return token instanceof RightParanthesis;
             case ";": return token instanceof SemiColon;
             case "id": return token instanceof Identifier;
+            case "+": return token instanceof Addition;
+            case "-": return token instanceof Subtraction;
+            case "*": return token instanceof Multiplication;
+            case "/": return token instanceof Division;
             case "=": return token.getType().equals("=");
+            case "!=": return token.getType().equals("!=");
+            case "==": return token.getType().equals("==");
             case "ref": return token.getType().equals("ref");
             case "const": return token.getType().equals("const");
             case "static": return token.getType().equals("static");
