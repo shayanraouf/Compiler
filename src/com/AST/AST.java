@@ -17,6 +17,7 @@ public class AST {
     private Token nextToken;
     protected List<AST> children = new ArrayList<>();
     private Stack<Character> stack = new Stack<>();
+    private HashMap<String, Integer> precedenceMap = new HashMap();
 
     /**
      * Constructor that accepts the Lexical Analyser
@@ -26,10 +27,27 @@ public class AST {
         iterator = lexer.iterator();
         currentToken = null;
         nextToken = iterator.next();
+        this.init_precedence_map();
     }
     public AST(Token t)       { currentToken = t; }
 
     public AST(int tokenType) { this.currentToken = new Token(tokenType); }
+
+    /**
+     *  Initialize Precedence Mapping
+     *      (unary and binary operators)
+     */
+    public void init_precedence_map(){
+        precedenceMap.put("||", 0);
+        precedenceMap.put("&&", 1);
+        precedenceMap.put("=", 2);
+        precedenceMap.put("+", 3);
+        precedenceMap.put("-", 4);
+        precedenceMap.put("~", 5);
+        precedenceMap.put("*", 6);
+        precedenceMap.put("/", 7);
+        precedenceMap.put("^", 8);
+    }
 
     /**
      * program ::= statement*
@@ -292,17 +310,19 @@ public class AST {
 
     /**
      * expression ::=
-     variable = expression
+     variable = expression    // included
      ! expression
      ~ expression
      - expression
-     expression + expression
-     expression - expression
-     expression * expression
-     expression / expression
+
+     expression + expression  // included
+     expression - expression  // included
+     expression * expression  // included
+     expression / expression  // included
      expression | expression
      expression & expression
      expression ^ expression
+
      expression << expression
      expression >> expression
      expression == expression
@@ -322,51 +342,113 @@ public class AST {
      * @return
      */
     private ExprNode expression(){
-
-        ExprNode root;
-        if(isMatch(currentToken,"id")){
-            ExprNode idNode = new Node(currentToken);
-
-            if(isMatch(nextToken,"=")){
-                Token assignment = nextToken;
-                readToken();
-                readToken();
-                ExprNode right = expression();
-                root = new AddNode(idNode,assignment,right);
-                return root;
-            }
-            else if(isMatch(nextToken,"op")){
-                Token operator = nextToken;
-                readToken();
-                readToken();
-                root = new AddNode(idNode,operator,expression());
-                return root;
-
-            }
-            else if(isMatch(currentToken,"(")){
-                readToken();
-                ExprNode param = expression();
-                if(param != null){
-                    idNode.addChild(param);
-                }
-                readToken();
-                return idNode;
-            }
-        }
-        else if(isMatch(currentToken,"int32")){
-            ExprNode num = new IntNode(currentToken);
-            if(isMatch(nextToken,"op")){
-                Token operator = currentToken;
-                readToken();
-                ExprNode nextExpre = expression();
-                return new AddNode(num, operator,nextExpre);
-            }
-            else{
-                return num;
-            }
-        }
-        return null;
+        ExprNode expr;   // tree
+        expr = equals();
+        return expr;
     }
+    private ExprNode equals(){
+        ExprNode expr;
+        expr = E();
+        while (isMatch(currentToken, "=")|| isMatch(currentToken, "!=") || isMatch(currentToken, "==")
+          /*      || isMatch(currentToken, "|")|| isMatch(currentToken, "^") || isMatch(currentToken, "==")
+                || isMatch(currentToken, "!=")|| isMatch(currentToken, ">") || isMatch(currentToken, ">=")
+                || isMatch(currentToken, "<=")|| isMatch(currentToken, "<") || isMatch(currentToken, "<<")
+                || isMatch(currentToken, "<<")
+          */
+                ){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = E();
+            expr = new AddNode(expr, op, expr1);
+        }
+        return expr;
+    }
+    private ExprNode E(){
+        ExprNode expr;
+        expr = T();
+        while (isMatch(currentToken, "+")|| isMatch(currentToken, "-")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = T();
+            expr = new AddNode(expr, op, expr1);
+        }
+        return expr;
+    }
+
+    private ExprNode T(){
+        ExprNode expr;
+        expr = F();
+        while (isMatch(currentToken, "*") || isMatch(currentToken, "/")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = F();
+            expr = new AddNode(expr, op, expr1);
+        }
+        return expr;
+    }
+
+    private ExprNode F(){
+        ExprNode expr;
+        expr = P();
+        if (isMatch(currentToken, "^")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = F();
+            return new AddNode(expr, op, expr1);
+        }
+        else
+            return expr;
+    }
+
+    private ExprNode P(){
+        ExprNode expr;
+        if(isMatch(currentToken, "id") || isMatch(currentToken, "basic-type")){   // are we at a terminal?
+            Token v = currentToken;
+            readToken();
+            expr = new Node(v);
+            return expr;
+        }
+        else if (isMatch(currentToken, "(")){   // open paren
+            readToken();
+            expr = E();
+            expect(")");
+            return expr;
+        }
+        else if(isUnary(currentToken)){     // unary operator
+            readToken();
+            expr = F();
+            return null;
+        }
+        else {
+            System.out.println("ERROR!!!!!");
+            return null;
+        }
+    }
+
+    private void expect(String tok){
+        if (currentToken.getType() == tok)
+            readToken();
+        else if(tok == null)
+            System.out.println("NO MORE TOKENS");
+        else
+            System.out.println("ERROR!");
+    }
+
+
+    private boolean isBinary(){
+            return true;
+    }
+    private boolean isUnary(Token tok){
+        return false;
+    }
+    private int precedence(){
+        return precedenceMap.get(currentToken.getType());
+    }
+/*
+    --------------- End Expression section -----------------------------------------------------
+ */
+
+
 
     /**
      * return-statement ::= return expressionopt ;
@@ -672,7 +754,13 @@ public class AST {
             case ")": return token instanceof RightParanthesis;
             case ";": return token instanceof SemiColon;
             case "id": return token instanceof Identifier;
+            case "+": return token instanceof Addition;
+            case "-": return token instanceof Subtraction;
+            case "*": return token instanceof Multiplication;
+            case "/": return token instanceof Division;
             case "=": return token.getType().equals("=");
+            case "!=": return token.getType().equals("!=");
+            case "==": return token.getType().equals("==");
             case "ref": return token.getType().equals("ref");
             case "const": return token.getType().equals("const");
             case "static": return token.getType().equals("static");

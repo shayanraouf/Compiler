@@ -1,14 +1,10 @@
-function foo(){
-    var foo = 3;
-    var foo = 3;
-    var foo = 3;
-    function foo(){
-        var foo = 3;
-        var foo = 3;
-        var foo = 3;
-    }
+//z = 10;
+//x = 4 * 3 / 2 + 1
 
-        var foo = 3;
-        var foo = 3;
-        var foo = 3;
+//z = 8 / 4 - 3 - 2 * 1;
+
+function fib1(){
+    if (z == (4 / 2) * (3 * (6+3)) + (4 / (2 * 2) + 8)){
+        x = 8 * 4 * 3 * 2
+    }
 }
