@@ -13,9 +13,9 @@ import java.util.*;
 public class AST {
 
     private Iterator<Token> iterator;
-    private Token currentToken;
+    public Token currentToken;
     private Token nextToken;
-    protected List<AST> children = new ArrayList<>();
+    public List<AST> children = new ArrayList<>();
     private Stack<Character> stack = new Stack<>();
 
     /**
@@ -717,7 +717,7 @@ public class AST {
         }
 
     }
-    
+
 
     public int getNodeType()  { return currentToken.type; }
 
