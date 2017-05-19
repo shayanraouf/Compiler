@@ -13,6 +13,7 @@ package com;
 import com.AST.AST;
 import com.LexicalAnalysis.Lexer;
 import com.LexicalAnalysis.Token;
+import com.SemanticAnalyzer.SymbolTable;
 
 import java.io.*;
 import java.util.Iterator;
@@ -35,7 +36,10 @@ public class Main {
         Lexer lexer = new Lexer(in);
         AST ast = new AST(lexer);
         ast.parse();
-        ast.display();
+        //ast.display();
+        SymbolTable symbolTable = new SymbolTable();
+//        symbolTable.buildTable(ast);
+//        symbolTable.test();
     }
 
 //

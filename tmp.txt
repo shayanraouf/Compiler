@@ -1,14 +1,4 @@
-function foo(){
-    var foo = 3;
-    var foo = 3;
-    var foo = 3;
-    function foo(){
-        var foo = 3;
-        var foo = 3;
-        var foo = 3;
-    }
-
-        var foo = 3;
-        var foo = 3;
-        var foo = 3;
+function scope1(){
+    var1 = 3
+    bar1 = 5
 }
