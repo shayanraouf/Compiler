@@ -17,6 +17,7 @@ public class AST {
     private Token nextToken;
     protected List<AST> children = new ArrayList<>();
     private Stack<Character> stack = new Stack<>();
+    private HashMap<String, Integer> precedenceMap = new HashMap();
 
     /**
      * Constructor that accepts the Lexical Analyser
@@ -26,10 +27,27 @@ public class AST {
         iterator = lexer.iterator();
         currentToken = null;
         nextToken = iterator.next();
+        this.init_precedence_map();
     }
     public AST(Token t)       { currentToken = t; }
 
     public AST(int tokenType) { this.currentToken = new Token(tokenType); }
+
+    /**
+     *  Initialize Precedence Mapping
+     *      (unary and binary operators)
+     */
+    public void init_precedence_map(){
+        precedenceMap.put("||", 0);
+        precedenceMap.put("&&", 1);
+        precedenceMap.put("=", 2);
+        precedenceMap.put("+", 3);
+        precedenceMap.put("-", 4);
+        precedenceMap.put("~", 5);
+        precedenceMap.put("*", 6);
+        precedenceMap.put("/", 7);
+        precedenceMap.put("^", 8);
+    }
 
     /**
      * program ::= statement*
@@ -322,51 +340,144 @@ public class AST {
      * @return
      */
     private ExprNode expression(){
-
-        ExprNode root;
-        if(isMatch(currentToken,"id")){
-            ExprNode idNode = new Node(currentToken);
-
-            if(isMatch(nextToken,"=")){
-                Token assignment = nextToken;
-                readToken();
-                readToken();
-                ExprNode right = expression();
-                root = new AddNode(idNode,assignment,right);
-                return root;
-            }
-            else if(isMatch(nextToken,"op")){
-                Token operator = nextToken;
-                readToken();
-                readToken();
-                root = new AddNode(idNode,operator,expression());
-                return root;
-
-            }
-            else if(isMatch(currentToken,"(")){
-                readToken();
-                ExprNode param = expression();
-                if(param != null){
-                    idNode.addChild(param);
-                }
-                readToken();
-                return idNode;
-            }
-        }
-        else if(isMatch(currentToken,"int32")){
-            ExprNode num = new IntNode(currentToken);
-            if(isMatch(nextToken,"op")){
-                Token operator = currentToken;
-                readToken();
-                ExprNode nextExpre = expression();
-                return new AddNode(num, operator,nextExpre);
-            }
-            else{
-                return num;
-            }
+        ExprNode expr;   // tree
+        expr = E();
+        if(isMatch(currentToken, ";")){
+            return expr;
         }
         return null;
     }
+
+    private ExprNode E(){
+        ExprNode expr;   //AST tree;
+        expr = T();      // tree = T();
+        while (isMatch(currentToken, "op")){// || isMatch(currentToken, "-")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = T();
+            return new AddNode(expr, op, expr1);
+        }
+        return expr;
+    }
+
+    private ExprNode T(){
+        ExprNode expr;   //AST tree;
+        expr = F();      // tree = F();
+        while (isMatch(currentToken, "*") || isMatch(currentToken, "/")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = F();   //AST tree1 = F();
+            return new AddNode(expr, op, expr1);
+        }
+        return expr;
+    }
+
+    private ExprNode F(){
+        ExprNode expr;   //AST tree;
+        expr = P();      // tree = P();
+        if (isMatch(currentToken, "^")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = F();   //AST tree1 = F();
+            return new AddNode(expr, op, expr1);
+        }
+        else
+            return expr;
+    }
+
+    private ExprNode P(){
+        ExprNode expr;   //AST tree;
+        if(!isMatch(currentToken, "op")){   // are we at a terminal?
+            Token v = currentToken;
+            readToken();
+            expr = new Node(v);
+            return expr;  //tree;
+        }
+        else if (isMatch(currentToken, "(")){   // open paren
+            readToken();
+            expr = E();    //tree = E();
+            expect(")");
+            return expr;   //tree;
+        }
+        else if(isUnary(currentToken)){     // unary operator
+            readToken();
+            expr = F();   //tree = F();
+            return null;
+        }
+        else {
+            System.out.println("ERROR!!!!!");
+            return null;
+        }
+    }
+
+    private void expect(String tok){
+        if (currentToken.getType() == tok)
+            readToken();
+        else if(tok == null)
+            System.out.println("NO MORE TOKENS");
+        else
+            System.out.println("ERROR!");
+    }
+
+
+
+
+    private boolean isBinary(){
+            return true;
+    }
+    private boolean isUnary(Token tok){
+        return false;
+    }
+    private int precedence(){
+        return precedenceMap.get(currentToken.getType());
+    }
+
+
+/*
+ Tests if its a valid expression, doesn't create tree
+
+
+private ExprNode expression(){
+        E();
+        ExprNode expr = new Node(currentToken);
+        if(isMatch(currentToken, ";")){
+            readToken();
+            return expr;
+        }
+        expect(null);
+       //while(!isMatch(currentToken, "op")) readToken();
+       // System.out.println("isBinary: " + isBinary());
+       // System.out.println("precedence: " + precedence());
+
+        // at end?
+        return null;
+    }
+ private void E(){
+        P();
+        while (isMatch(currentToken, "op")){
+            readToken();
+            P();
+        }
+    }
+    private  void P(){
+
+        if (isMatch(currentToken, "id") || isMatch(currentToken, "int32"))
+            readToken();
+        else if(isMatch(currentToken, "(")){
+            readToken();
+            E();
+            expect( ")" );
+        }
+        else if(isUnary(currentToken)){
+                readToken();
+                P();
+        }
+        else
+            System.out.println("ERROR!!!");
+    }*/
+
+
+
 
     /**
      * return-statement ::= return expressionopt ;

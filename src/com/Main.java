@@ -38,15 +38,6 @@ public class Main {
         ast.display();
     }
 
-//
-//    public static void run2(String in){
-//        Lexer lexer = new Lexer(in);
-//        Parser parser = new Parser(lexer);
-//        AST ast = parser.parse();
-//        ast.display();
-//
-//    }
-
     public static void run(String in){
 
         Lexer lexer = new Lexer(in);
