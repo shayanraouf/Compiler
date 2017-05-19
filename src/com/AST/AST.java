@@ -310,17 +310,19 @@ public class AST {
 
     /**
      * expression ::=
-     variable = expression
+     variable = expression    // included
      ! expression
      ~ expression
      - expression
-     expression + expression
-     expression - expression
-     expression * expression
-     expression / expression
+
+     expression + expression  // included
+     expression - expression  // included
+     expression * expression  // included
+     expression / expression  // included
      expression | expression
      expression & expression
      expression ^ expression
+
      expression << expression
      expression >> expression
      expression == expression
@@ -347,7 +349,13 @@ public class AST {
     private ExprNode equals(){
         ExprNode expr;
         expr = E();
-        while (isMatch(currentToken, "=")|| (isMatch(currentToken, "!=")) || (isMatch(currentToken, "=="))){
+        while (isMatch(currentToken, "=")|| isMatch(currentToken, "!=") || isMatch(currentToken, "==")
+          /*      || isMatch(currentToken, "|")|| isMatch(currentToken, "^") || isMatch(currentToken, "==")
+                || isMatch(currentToken, "!=")|| isMatch(currentToken, ">") || isMatch(currentToken, ">=")
+                || isMatch(currentToken, "<=")|| isMatch(currentToken, "<") || isMatch(currentToken, "<<")
+                || isMatch(currentToken, "<<")
+          */
+                ){
             Token op = currentToken;
             readToken();
             ExprNode expr1 = E();
@@ -393,8 +401,8 @@ public class AST {
     }
 
     private ExprNode P(){
-        ExprNode expr;   //AST tree;
-        if(!isMatch(currentToken, "op")){   // are we at a terminal?
+        ExprNode expr;
+        if(isMatch(currentToken, "id") || isMatch(currentToken, "basic-type")){   // are we at a terminal?
             Token v = currentToken;
             readToken();
             expr = new Node(v);
@@ -427,8 +435,6 @@ public class AST {
     }
 
 
-
-
     private boolean isBinary(){
             return true;
     }
@@ -438,51 +444,9 @@ public class AST {
     private int precedence(){
         return precedenceMap.get(currentToken.getType());
     }
-
-
 /*
- Tests if its a valid expression, doesn't create tree
-
-
-private ExprNode expression(){
-        E();
-        ExprNode expr = new Node(currentToken);
-        if(isMatch(currentToken, ";")){
-            readToken();
-            return expr;
-        }
-        expect(null);
-       //while(!isMatch(currentToken, "op")) readToken();
-       // System.out.println("isBinary: " + isBinary());
-       // System.out.println("precedence: " + precedence());
-
-        // at end?
-        return null;
-    }
- private void E(){
-        P();
-        while (isMatch(currentToken, "op")){
-            readToken();
-            P();
-        }
-    }
-    private  void P(){
-
-        if (isMatch(currentToken, "id") || isMatch(currentToken, "int32"))
-            readToken();
-        else if(isMatch(currentToken, "(")){
-            readToken();
-            E();
-            expect( ")" );
-        }
-        else if(isUnary(currentToken)){
-                readToken();
-                P();
-        }
-        else
-            System.out.println("ERROR!!!");
-    }*/
-
+    --------------- End Expression section -----------------------------------------------------
+ */
 
 
 
