@@ -90,17 +90,18 @@ public class AST {
 
         String keyword = currentToken.getType();
         switch(keyword){
-            case "while": return while_statement();                      // while-statement |
-            case "print": return print_statement();                      // print-statement |
-            case "return": return return_statement();                    // return-statement |
-            case "function": return function_declaration();              // function-declaration |
-            case "for": return for_statement();                          // for-statement |
-            case "if": return if_statement();                            // if-statement |
-            case "exit": return exit_statement();                        // exit-statement |
-            case "type": return type_declaration();                      // type-declaration |
             case "static": return variable_declaration();                // variable-declaration |
             case "const": return variable_declaration();                  // variable-declaration |
-            case "var": return variable_declaration();                    // variable-declaration |
+            case "var": return variable_declaration();
+            case "for": return for_statement();                          // for-statement |
+            case "while": return while_statement();                      // while-statement |
+            case "if": return if_statement();                            // if-statement |
+            case "print": return print_statement();                      // print-statement |
+            case "return": return return_statement();                    // return-statement |
+            case "exit": return exit_statement();                        // exit-statement |
+            case "function": return function_declaration();              // function-declaration |
+            case "type": return type_declaration();                      // type-declaration |
+                         // variable-declaration |
             default:
                 break;
         }
@@ -204,8 +205,6 @@ public class AST {
         readToken();
         function.addChild(new Node(currentToken)); // save function identifier
 
-
-
         readToken(); // get next
         if(!isMatch(nextToken,")")){ // we have parameter(s)
             readToken();
@@ -213,9 +212,8 @@ public class AST {
         }
 
         readToken(); // get next
-
-
         readToken(); // get next
+
         readToken(); // get next
         stack.push('{');
         function.addChild(block_statement());
@@ -258,9 +256,8 @@ public class AST {
         readToken(); // must equal expression
 
         whileStatement.addChild(expression());
-        readToken();// curr = ), next = {
-        readToken(); // curr = { , next = statement | }
-        readToken(); // curr = statement | } , next = statement | }
+        readToken();// curr = , next =
+        readToken(); // curr =  , next = statement
         stack.push('{');
         whileStatement.addChild(block_statement());
         return whileStatement;
@@ -284,14 +281,14 @@ public class AST {
             expr1 = expression();
         }
 
-        readToken(); // curr = 'expr' or ";"
+        //readToken(); // curr = 'expr' or ";"
         readToken();
 
         if(isMatch(currentToken,"id")){
             expr2 = expression();
         }
 
-        readToken(); // curr = ; , next = 'expr' or ";"
+        //readToken(); // curr = ; , next = 'expr' or ";"
         readToken(); // curr = 'expr' or ";"
 
         if(isMatch(currentToken,"id")){
@@ -303,9 +300,8 @@ public class AST {
         forStatement.addChild(expr3);
 
         stack.push('{');
-        readToken(); // curr = ; , next = 'expr' or ";"
-        readToken(); // curr = 'expr' or ";"
-        readToken(); // curr = 'expr' or ";"
+        readToken(); // curr = rehash
+        readToken(); // curr = rehash
         forStatement.addChild(block_statement());
         return forStatement;
     }
@@ -352,7 +348,7 @@ public class AST {
         ExprNode expr;
         expr = E();
         while (isMatch(currentToken, "=")|| isMatch(currentToken, "!=") || isMatch(currentToken, "==")
-          /*      || isMatch(currentToken, "|")|| isMatch(currentToken, "^") || isMatch(currentToken, "==")
+                || isMatch(currentToken, "<")|| isMatch(currentToken, ">")/*      || isMatch(currentToken, "|")|| isMatch(currentToken, "^") || isMatch(currentToken, "==")
                 || isMatch(currentToken, "!=")|| isMatch(currentToken, ">") || isMatch(currentToken, ">=")
                 || isMatch(currentToken, "<=")|| isMatch(currentToken, "<") || isMatch(currentToken, "<<")
                 || isMatch(currentToken, "<<")
@@ -485,13 +481,10 @@ public class AST {
         readToken(); // must equal expression
 
         if_statement.addChild(expression());
-        readToken();// curr = ), next = {
-        readToken(); // curr = { , next = statement | }
-        readToken(); // curr = statement | } , next = statement | }
+        readToken();// curr = close_paren, next = open_brace
+        readToken(); // curr = open_brace , next = identifier
         stack.push('{');
         if_statement.addChild(block_statement());
-//        System.out.println("curr " + currentToken);
-//        System.out.println("next " + nextToken);
         if(isMatch(nextToken,"else")){
             readToken();
             if_statement.addChild(else_statement());
@@ -551,7 +544,7 @@ public class AST {
         readToken();
         if(!isMatch(currentToken,"id")) error_message("identifier", currentToken);
         variable_declaration.addChild(new Node(currentToken));
-        //readToken();
+
         if(isMatch(nextToken,"=")){                      // case: = expression ;
             variable_declaration.addChild(expression());
         }
@@ -760,6 +753,8 @@ public class AST {
             case "-": return token instanceof Subtraction;
             case "*": return token instanceof Multiplication;
             case "/": return token instanceof Division;
+            case "<": return token.getType().equals("<");
+            case ">": return token.getType().equals(">");
             case "=": return token.getType().equals("=");
             case "!=": return token.getType().equals("!=");
             case "==": return token.getType().equals("==");
@@ -768,7 +763,7 @@ public class AST {
             case "static": return token.getType().equals("static");
             case "var": return token.getType().equals("var");
             case "basic-type": return token instanceof Number;
-            case "int32": return token instanceof Int32;
+            //case "int32": return token instanceof Int32;
             case "float64": return token instanceof Float64;
             case "byte": return token instanceof Byte;
             case "op": return token instanceof Operator;
@@ -778,7 +773,20 @@ public class AST {
         }
         return false;
     }
-
+/*
+    private boolean isDeclaration(String s) {
+        if (token == null) return false;
+        switch (s) {
+            case "int32": return true;
+            case "byte": return true;
+            case "const": return true;
+            case "float64": return true;
+            case "static" : return true;
+                return token instanceof LeftBracket;
+            case "]":
+                return token instanceof RightBracket;
+        }
+    }*/
 
     public void print(int n){
         for(int i = 0; i < n; i++){
