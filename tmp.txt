@@ -1,6 +1,0 @@
-function fib1(){
-    function fib2(){
-
-    }
-}
-m = 8
