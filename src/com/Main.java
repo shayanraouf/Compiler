@@ -30,7 +30,7 @@ public class Main {
         //new Main().run("tmp.txt");
 
 
-        new Main().run2("tmp.txt");
+        new Main().run2("tmp2.txt");
 
 
     }
