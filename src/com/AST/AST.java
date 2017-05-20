@@ -155,15 +155,16 @@ public class AST {
      */
     private AST non_array_type_descriptor(){
         ExprNode nonArrayTypeDescriptor = null;
-
-        if(isMatch(currentToken,"keyword")){
+        System.out.println(currentToken.getType());
+        if(isMatch(currentToken,"record")){
+            nonArrayTypeDescriptor = new Node(currentToken);
+            nonArrayTypeDescriptor.addChild(record_descriptor());
+        }
+        else if(isMatch(currentToken,"keyword")){
             nonArrayTypeDescriptor = new IntNode(currentToken);
         }
-        else if(isMatch(currentToken,"record-descriptor")){
-
-        }
         else if(isMatch(currentToken,"id")){
-
+            nonArrayTypeDescriptor = new Node(currentToken);
         }
         return nonArrayTypeDescriptor;
     }
@@ -185,9 +186,9 @@ public class AST {
      */
     private AST expressions(){
         AST expressions = new AST(new Token("expression(s)"));
-        while(hasNext() && !isMatch(currentToken,",") && !isMatch(currentToken,"]")){
-            expressions.addChild(expression());
+        while(hasNext() && !isMatch(currentToken,"]") && !isMatch(currentToken,";")){
             readToken();
+            expressions.addChild(expression());
         }
         return expressions;
     }
@@ -453,6 +454,7 @@ public class AST {
     private AST return_statement(){
         AST return_statement = new AST(new Token("return-statement"));
         if(isMatch(nextToken,";")) return return_statement;
+        readToken();
         return_statement.addChild(expression());
         return return_statement;
     }
@@ -464,6 +466,7 @@ public class AST {
      */
     private AST print_statement(){
         AST print_statement = new AST(new Token("print-statement"));
+        readToken();
         print_statement.addChild(expression());
         return print_statement;
     }
@@ -547,11 +550,9 @@ public class AST {
             variable_declaration.addChild(expression());
         }
         else {                                              // case: type-descriptor ;
+            readToken();
             variable_declaration.addChild(type_descriptor());
         }
-//        System.out.println("Current: " + currentToken);
-//        System.out.println("Next: " + nextToken);
-        readToken();
 
         return variable_declaration;
     }
@@ -565,11 +566,12 @@ public class AST {
 
         while(hasNext()){                       // calls parameter() for every comma
             field_declarations.addChild(field_declaration());
-            if(isMatch(nextToken,",")){
+            if(isMatch(currentToken,",")){
                 readToken();
                 readToken();
             }
-            if(isMatch(currentToken,")") || isMatch(nextToken,")")) break;
+            if (currentToken.getType().equals("end")) return field_declarations;
+            else if(isMatch(currentToken,")") || isMatch(nextToken,")")) break;
         }
         return field_declarations;
     }
@@ -582,7 +584,8 @@ public class AST {
     private AST field_declaration(){
         AST field_declaration = new AST(new Token("field-declaration"));
         field_declaration.addChild(new Node(currentToken)); // add identifier
-        if(!isMatch(currentToken,"id")) error_message("identifier", currentToken);
+
+        //if(!isMatch(currentToken,"id")) error_message("identifier", currentToken);
         readToken();
         field_declaration.addChild(type_descriptor());
         return field_declaration;
@@ -597,8 +600,8 @@ public class AST {
         AST record_descriptor = new AST(new Token("record-descriptor"));
         readToken();
         record_descriptor.addChild(field_declarations());
-        if(!isMatch(currentToken,"end"))error_message("end", currentToken);
-        readToken();
+        //if(!isMatch(currentToken,"end"))error_message("end", currentToken);
+        record_descriptor.addChild(new Node(currentToken));
         return record_descriptor;
     }
 
@@ -629,6 +632,8 @@ public class AST {
             readToken();
             type_descriptor.addChild(dimension());
         }
+        else readToken();
+
         return type_descriptor;
     }
 
@@ -639,6 +644,7 @@ public class AST {
     private AST exit_statement(){
         AST exit_statement = new Node(currentToken);
         if(isMatch(nextToken,";")) return exit_statement;
+        readToken();
         exit_statement.addChild(expression());
         return exit_statement;
     }
@@ -761,7 +767,8 @@ public class AST {
             case "static": return token.getType().equals("static");
             case "var": return token.getType().equals("var");
             case "basic-type": return token instanceof Number;
-            //case "int32": return token instanceof Int32;
+            case "record": return token.getType().equals("record");
+            case "int32": return token instanceof Int32;
             case "float64": return token instanceof Float64;
             case "byte": return token instanceof Byte;
             case "op": return token instanceof Operator;
