@@ -11,11 +11,12 @@ import com.LexicalAnalysis.Number;
 
 import java.util.*;
 public class AST {
+    private AST root;
 
     private Iterator<Token> iterator;
-    private Token currentToken;
+    public Token currentToken;
     private Token nextToken;
-    protected List<AST> children = new ArrayList<>();
+    public List<AST> children = new ArrayList<>();
     private Stack<Character> stack = new Stack<>();
     private HashMap<String, Integer> precedenceMap = new HashMap();
 
@@ -53,6 +54,7 @@ public class AST {
      * program ::= statement*
      */
     public void parse(){
+        root = new AST(new Token("ROOTNODE"));
         while(hasNext()){
             readToken();
             AST ast = statement();
@@ -790,18 +792,16 @@ public class AST {
         for (AST tree : children) {
             display(tree, 1);
         }
-
+        //display(root, 1);
     }
     private void display(AST treeNode, int level){
-
         if(treeNode != null){
             print(level);
             System.out.println(treeNode.currentToken);
-
             for(AST child: treeNode.children){
                 display(child, level + 1);
-            }
 
+            }
         }
 
     }

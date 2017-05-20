@@ -13,9 +13,13 @@ package com;
 import com.AST.AST;
 import com.LexicalAnalysis.Lexer;
 import com.LexicalAnalysis.Token;
+import com.SemanticAnalyzer.BuildSymbolTable;
+import com.SemanticAnalyzer.SymbolTable;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -36,6 +40,8 @@ public class Main {
         AST ast = new AST(lexer);
         ast.parse();
         ast.display();
+        BuildSymbolTable table = new BuildSymbolTable(ast);
+        table.build();
     }
 
     public static void run(String in){
