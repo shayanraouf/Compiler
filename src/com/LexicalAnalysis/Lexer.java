@@ -166,12 +166,12 @@ public class Lexer implements Iterable<Token>{
                 case '|':
                     lookAhead = (char)in.read();
                     if(lookAhead == '|'){
-                        return new Operator("||",row,col);
+                        return new Logical_OR(row, col);
                     }
                     else {
                         current = lookAhead;
                         readCurrent = false;
-                        return new Operator("|", row, col);
+                        return new Operator("|",row,col);
                     }
 
                 default:

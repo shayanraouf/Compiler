@@ -28,11 +28,7 @@ public class Main {
         //new Main().run((String)args[0]);
 	  //new Main().run(args[0]);
         //new Main().run("tmp.txt");
-
-
-        new Main().run2("tmp2.txt");
-
-
+        new Main().run2("tmp.txt");
     }
 
     public static void run2(String in){
