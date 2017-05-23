@@ -71,7 +71,15 @@ public class AST {
     private AST statement() {
         if(currentToken == null) return null;
 
-        if(isMatch(currentToken,"id")) return expression();
+        if(isMatch(currentToken,"id")){
+            if(isMatch(nextToken, "("))
+                return function_call();
+            else if(isMatch(nextToken, "[") || isMatch(nextToken, ","))
+                return variable();
+            //else if(isMatch(nextToken, "=")) expression_statement();
+            else
+                return expression_statement();
+        }
 
         if(isMatch(currentToken, "}")){             // checks if a close param and updates stack
             if(!stack.isEmpty()){
@@ -80,11 +88,6 @@ public class AST {
         }
 
         if(currentToken == null) return null;
-
-//        if(hasNext() && isMatch(currentToken, "{")){
-//            stack.push('{');
-//            return statement();        // block-statement |
-//        }
 
         String keyword = currentToken.getType();
         switch(keyword){
@@ -99,10 +102,16 @@ public class AST {
             case "exit": return exit_statement();                        // exit-statement |
             case "function": return function_declaration();              // function-declaration |
             case "type": return type_declaration();                      // type-declaration |
-                         // variable-declaration |
+            case "int32": return casting_declaration();                  // casting type
+            case "float64": return casting_declaration();                // casting type
+            case "byte": return casting_declaration();                   // casting type
+
             default:
                 break;
         }
+        if(isMatch(currentToken, "int32") || isMatch(currentToken, "float64"))
+            return expression();
+
         return null;
     }
 
@@ -124,10 +133,28 @@ public class AST {
             readToken();
         }
 
-        param.addChild(new Node(currentToken)); // add the identifier
-        readToken();
+        // identifier =
+        if (isMatch(nextToken, "=")) {
+            param.addChild(expression());
+            return param;
+        }
+        // indentifier type-descriptor
+        else{
+            param.addChild(new Node(currentToken));
+            readToken();
+            param.addChild(non_array_type_descriptor());
 
-        param.addChild(non_array_type_descriptor());
+            // if dimension_wildcards
+            if(isMatch(nextToken, "[")){
+                readToken();
+                param.addChild(dimension_wildcards());
+            }
+        }
+
+        if(isMatch(currentToken, ")"))
+            return param;
+
+        readToken();
         return param;
     }
 
@@ -139,12 +166,15 @@ public class AST {
         ExprNode parameters = new Node(new Token("parameter(s)"));
 
         while(hasNext()){                       // calls parameter() for every comma
-            parameters.addChild(parameter());
+             parameters.addChild(parameter());
             if(isMatch(nextToken,",")){
                 readToken();
                 readToken();
             }
-            if(isMatch(currentToken,")") || isMatch(nextToken,")")) break;
+            if(isMatch(currentToken,")") || isMatch(nextToken,")")
+                    || currentToken.getType().equals("byte")
+                    || currentToken.getType().equals("int32")
+                    || currentToken.getType().equals("float64")) break;
         }
         return parameters;
     }
@@ -155,7 +185,6 @@ public class AST {
      */
     private AST non_array_type_descriptor(){
         ExprNode nonArrayTypeDescriptor = null;
-        System.out.println(currentToken.getType());
         if(isMatch(currentToken,"record")){
             nonArrayTypeDescriptor = new Node(currentToken);
             nonArrayTypeDescriptor.addChild(record_descriptor());
@@ -186,7 +215,8 @@ public class AST {
      */
     private AST expressions(){
         AST expressions = new AST(new Token("expression(s)"));
-        while(hasNext() && !isMatch(currentToken,"]") && !isMatch(currentToken,";")){
+        while(hasNext() && !isMatch(currentToken,"]") && !isMatch(currentToken,";")
+                && !isMatch(currentToken,")")){
             readToken();
             expressions.addChild(expression());
         }
@@ -211,7 +241,11 @@ public class AST {
         }
 
         readToken(); // get next
-        readToken(); // get next
+        if (isMatch(nextToken, "{"))
+            function.addChild(type_descriptor());
+
+        //readToken(); // get next
+
 
         readToken(); // get next
         stack.push('{');
@@ -238,6 +272,7 @@ public class AST {
 
             AST nextTree = statement();
             if(nextTree == null) break;
+            // if NOT semicolon?
             readToken();
             blockStatement.addChild(nextTree);
         }
@@ -256,7 +291,8 @@ public class AST {
 
         whileStatement.addChild(expression());
         readToken();// curr = , next =
-        readToken(); // curr =  , next = statement
+        if (isMatch(currentToken, "{"))
+            readToken(); // curr =  , next = statement
         stack.push('{');
         whileStatement.addChild(block_statement());
         return whileStatement;
@@ -280,14 +316,12 @@ public class AST {
             expr1 = expression();
         }
 
-        //readToken(); // curr = 'expr' or ";"
         readToken();
 
         if(isMatch(currentToken,"id")){
             expr2 = expression();
         }
 
-        //readToken(); // curr = ; , next = 'expr' or ";"
         readToken(); // curr = 'expr' or ";"
 
         if(isMatch(currentToken,"id")){
@@ -304,6 +338,25 @@ public class AST {
         forStatement.addChild(block_statement());
         return forStatement;
     }
+
+    public AST casting_declaration(){
+        AST cast = new AST(currentToken);
+        readToken(); // read type
+        readToken(); // read open paren
+        cast.addChild(expression());
+        readToken();  // read close paren
+        return cast;
+    }
+
+    public AST subscript_declaration(){
+        AST sub = new AST(currentToken);
+        readToken(); // read open bracket
+        sub.addChild(expressions());
+        readToken();  // read close paren
+        return sub;
+    }
+
+
 
     /**
      * expression ::=
@@ -340,64 +393,148 @@ public class AST {
      */
     private ExprNode expression(){
         ExprNode expr;   // tree
+
         expr = equals();
         return expr;
     }
     private ExprNode equals(){
         ExprNode expr;
-        expr = E();
-        while (isMatch(currentToken, "=")|| isMatch(currentToken, "!=") || isMatch(currentToken, "==")
-                || isMatch(currentToken, "<")|| isMatch(currentToken, ">")/*      || isMatch(currentToken, "|")|| isMatch(currentToken, "^") || isMatch(currentToken, "==")
-                || isMatch(currentToken, "!=")|| isMatch(currentToken, ">") || isMatch(currentToken, ">=")
-                || isMatch(currentToken, "<=")|| isMatch(currentToken, "<") || isMatch(currentToken, "<<")
-                || isMatch(currentToken, "<<")
-          */
-                ){
+        expr = logical_or();
+        while (isMatch(currentToken, "=")){
             Token op = currentToken;
             readToken();
-            ExprNode expr1 = E();
+            ExprNode expr1 = logical_or();
+            expr = new AddNode(expr, op, expr1);
+            if (isMatch(currentToken, ")")) readToken();
+        }
+        return expr;
+    }
+    private ExprNode logical_or(){
+        ExprNode expr;
+        expr = logical_and();
+        while (isMatch(currentToken, "||")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = logical_and();
             expr = new AddNode(expr, op, expr1);
         }
         return expr;
     }
-    private ExprNode E(){
+    private ExprNode logical_and(){
         ExprNode expr;
-        expr = T();
+        expr = bitwise_or();
+        while (isMatch(currentToken, "&&")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = bitwise_or();
+            expr = new AddNode(expr, op, expr1);
+        }
+        return expr;
+    }
+    private ExprNode bitwise_or(){
+        ExprNode expr;
+        expr = bitwise_xor();
+        while (isMatch(currentToken, "|")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = bitwise_xor();
+            expr = new AddNode(expr, op, expr1);
+        }
+        return expr;
+    }
+    private ExprNode bitwise_xor(){
+        ExprNode expr;
+        expr = bitwise_and();
+        while (isMatch(currentToken, "^")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = bitwise_and();
+            expr = new AddNode(expr, op, expr1);
+        }
+        return expr;
+    }
+    private ExprNode bitwise_and(){
+        ExprNode expr;
+        expr = equality();
+        while (isMatch(currentToken, "&")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = equality();
+            expr = new AddNode(expr, op, expr1);
+        }
+        return expr;
+    }
+    private ExprNode equality(){
+        ExprNode expr;
+        expr = greater_or_less_than();
+        while (isMatch(currentToken, "==")|| isMatch(currentToken, "!=")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = greater_or_less_than();
+            expr = new AddNode(expr, op, expr1);
+        }
+        return expr;
+    }
+    private ExprNode greater_or_less_than(){
+        ExprNode expr;
+        expr = stream();
+        while (isMatch(currentToken, "<=")|| isMatch(currentToken, "<") ||
+                isMatch(currentToken, ">=")|| isMatch(currentToken, ">")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = stream();
+            expr = new AddNode(expr, op, expr1);
+        }
+        return expr;
+    }
+    private ExprNode stream(){
+        ExprNode expr;
+        expr = simple_math();
+        while (isMatch(currentToken, "<<")|| isMatch(currentToken, ">>")){
+            Token op = currentToken;
+            readToken();
+            ExprNode expr1 = simple_math();
+            expr = new AddNode(expr, op, expr1);
+        }
+        return expr;
+    }
+
+    private ExprNode simple_math(){
+        ExprNode expr;
+        expr = products();
         while (isMatch(currentToken, "+")|| isMatch(currentToken, "-")){
             Token op = currentToken;
             readToken();
-            ExprNode expr1 = T();
+            ExprNode expr1 = products();
             expr = new AddNode(expr, op, expr1);
         }
         return expr;
     }
 
-    private ExprNode T(){
+    private ExprNode products(){
         ExprNode expr;
-        expr = F();
+        expr = basement();
         while (isMatch(currentToken, "*") || isMatch(currentToken, "/")){
             Token op = currentToken;
             readToken();
-            ExprNode expr1 = F();
+            ExprNode expr1 = basement();
             expr = new AddNode(expr, op, expr1);
         }
         return expr;
     }
-
-    private ExprNode F(){
+/*    private ExprNode casting(){   // handle casting
         ExprNode expr;
-        expr = P();
-        if (isMatch(currentToken, "^")){
-            Token op = currentToken;
-            readToken();
-            ExprNode expr1 = F();
-            return new AddNode(expr, op, expr1);
+        expr = basement();
+        while (currentToken.getType().equals("int32")
+                || currentToken.getType().equals("byte")
+                || currentToken.getType().equals("float64")){
+                Token cast = currentToken;
+                ExprNode expr1 = (ExprNode)casting_declaration();
+                expr = new AddNode(expr, cast, expr1);
         }
-        else
-            return expr;
-    }
-
-    private ExprNode P(){
+        return expr;
+    }*/
+    private ExprNode basement(){
         ExprNode expr;
         if(isMatch(currentToken, "id") || isMatch(currentToken, "basic-type")){   // are we at a terminal?
             Token v = currentToken;
@@ -407,13 +544,13 @@ public class AST {
         }
         else if (isMatch(currentToken, "(")){   // open paren
             readToken();
-            expr = E();
+            expr = equals();
             expect(")");
             return expr;
         }
         else if(isUnary(currentToken)){     // unary operator
             readToken();
-            expr = F();
+            expr = equals();
             return null;
         }
         else {
@@ -483,7 +620,8 @@ public class AST {
 
         if_statement.addChild(expression());
         readToken();// curr = close_paren, next = open_brace
-        readToken(); // curr = open_brace , next = identifier
+        if(isMatch(currentToken, "{"))
+            readToken(); // curr = open_brace , next = identifier
         stack.push('{');
         if_statement.addChild(block_statement());
         if(isMatch(nextToken,"else")){
@@ -491,7 +629,6 @@ public class AST {
             if_statement.addChild(else_statement());
         }
         return if_statement;
-
     }
 
     /**
@@ -511,8 +648,15 @@ public class AST {
      * dimension-wildcards ::= [ ( dimension-wildcards , ) * ]
      * @return
      */
+    // TODO - implement the recursive dimension-wildcards
     private AST dimension_wildcards() {
-        return null;
+        AST wildcards = new AST(new Token("dimesion_wildcards(s)"));
+        readToken();  // read open bracket
+        if(!isMatch(currentToken, "]"))
+            wildcards.addChild(new Node(currentToken));
+
+        readToken(); // read close bracket
+        return wildcards;
     }
 
     /**
@@ -686,8 +830,10 @@ public class AST {
         if(!isMatch(nextToken, ")")){
             function_call.addChild(expressions());
         }
+        else{
+            readToken();
+        }
         readToken();
-
         return function_call;
     }
 
@@ -698,14 +844,15 @@ public class AST {
     private AST variable(){
         AST variable = new AST(new Token("variable"));
         variable.addChild(new Node(currentToken));
-        if(isMatch(nextToken, "[")){
-            readToken();
+        readToken();
+        if(isMatch(currentToken, "[")){
             variable.addChild(subscript());
         }
-
-        while(hasNext() && !isMatch(currentToken, ")") && isMatch(nextToken,")")){
+        if(isMatch(currentToken, ",")){
+            readToken();  // read comma
             variable.addChild(variable());
         }
+
         return variable;
     }
 
@@ -757,11 +904,22 @@ public class AST {
             case "-": return token instanceof Subtraction;
             case "*": return token instanceof Multiplication;
             case "/": return token instanceof Division;
+            case "^": return token.getType().equals("^");
+            case "~": return token instanceof BitwiseNot;
+            case "|": return token.getType().equals("|");
+            case "&": return token.getType().equals("&");
             case "<": return token.getType().equals("<");
+            case "<=": return token.getType().equals("<=");
+            case ">=": return token.getType().equals(">=");
             case ">": return token.getType().equals(">");
             case "=": return token.getType().equals("=");
             case "!=": return token.getType().equals("!=");
             case "==": return token.getType().equals("==");
+            case "||": return token.getType().equals("||");
+            case "&&": return token.getType().equals("&&");
+
+            case "<<": return token.getType().equals("<<");
+            case ">>": return token.getType().equals(">>");
             case "ref": return token.getType().equals("ref");
             case "const": return token.getType().equals("const");
             case "static": return token.getType().equals("static");
@@ -778,20 +936,6 @@ public class AST {
         }
         return false;
     }
-/*
-    private boolean isDeclaration(String s) {
-        if (token == null) return false;
-        switch (s) {
-            case "int32": return true;
-            case "byte": return true;
-            case "const": return true;
-            case "float64": return true;
-            case "static" : return true;
-                return token instanceof LeftBracket;
-            case "]":
-                return token instanceof RightBracket;
-        }
-    }*/
 
     public void print(int n){
         for(int i = 0; i < n; i++){
@@ -816,11 +960,8 @@ public class AST {
             for(AST child: treeNode.children){
                 display(child, level + 1);
             }
-
         }
-
     }
-    
 
     public int getNodeType()  { return currentToken.type; }
 

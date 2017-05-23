@@ -27,8 +27,6 @@ public class Main {
 
 
         new Main().run2("tmp.txt");
-
-
     }
 
     public static void run2(String in){
