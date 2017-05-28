@@ -1,19 +1,25 @@
-package com.SemanticAnalyzer;
+package com.SemanticAnalyzer.Util;
 
 import com.LexicalAnalysis.Token;
+import com.LexicalAnalysis.Type;
 
 /**
  * Created by shayanraouf on 5/19/2017.
  */
 public class Symbol {
-    public static enum TYPE {VARIABLE,STATIC,FIELD, ARGUMENT,NONE}
+    Type TYPE;
     String name;
     String info;
     Token token;
-    long location;
+    Scope scope;
 
     public Symbol(Token token){
         this.name = token.getClass().getSimpleName();
+    }
+
+    public Symbol(Token token, Type t){
+        this.name = token.getClass().getSimpleName();
+        TYPE = t;
     }
 
     public String toString(){

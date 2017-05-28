@@ -5,39 +5,29 @@
   Lexer.java
  */
 
-
 package com;
-
-//import com.AbstractSyntaxTree.AST;
-//import com.AbstractSyntaxTree.Parser;
 import com.AST.AST;
 import com.LexicalAnalysis.Lexer;
 import com.LexicalAnalysis.Token;
 import com.SemanticAnalyzer.BuildSymbolTable;
-import com.SemanticAnalyzer.SymbolTable;
 
-import java.io.*;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Scanner;
+
 
 public class Main {
     public static void main(String[] args){
-	
-        //new Main().run((String)args[0]);
-	  //new Main().run(args[0]);
-        //new Main().run("tmp.txt");
-        new Main().run2("tmp.txt");
+        new Main().run2("tmp2.txt");
     }
 
     public static void run2(String in){
         Lexer lexer = new Lexer(in);
         AST ast = new AST(lexer);
         ast.parse();
+        BuildSymbolTable symbolTable = new BuildSymbolTable(ast);
+        symbolTable.firstPass();
+
         ast.display();
-        BuildSymbolTable table = new BuildSymbolTable(ast);
-        table.build();
+
     }
 
     public static void run(String in){
@@ -50,26 +40,4 @@ public class Main {
             System.out.println(token);
         }
     }
-
-    public static String FileToString(String input){
-        Scanner scanner = null;
-        StringBuilder sb = null;
-        try{
-            scanner = new Scanner(new File(input));
-            sb = new StringBuilder();
-
-            while(scanner.hasNextLine()){
-                sb.append(scanner.nextLine());
-                sb.append("\n");
-            }
-        }
-        catch (Exception e){
-            System.err.println("Error " + e);
-            System.exit(-1);
-        }
-        finally {
-            scanner.close();
-            return sb.toString();
-        }
-    } 
 }

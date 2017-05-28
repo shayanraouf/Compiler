@@ -1,5 +1,4 @@
 package com.AST;
-
 import com.LexicalAnalysis.Token;
 
 /**

@@ -1,17 +1,17 @@
 package com.AST;
-
+import com.LexicalAnalysis.*;
+import com.LexicalAnalysis.Number;
+import com.LexicalAnalysis.Byte;
+import java.util.*;
 /**
  * Created by shayanraouf on 5/14/2017.
  */
 
 
-import com.LexicalAnalysis.*;
-import com.LexicalAnalysis.Byte;
-import com.LexicalAnalysis.Number;
-
-import java.util.*;
 public class AST {
-    private AST root;
+    public Type TYPE = null;
+    public boolean isStatic = false;
+    public boolean isConst = false;
 
     private Iterator<Token> iterator;
     public Token currentToken;
@@ -54,7 +54,7 @@ public class AST {
      * program ::= statement*
      */
     public void parse(){
-        root = new AST(new Token("ROOTNODE"));
+
         while(hasNext()){
             readToken();
             AST ast = statement();
@@ -62,6 +62,7 @@ public class AST {
                 children.add(ast);
             }
         }
+        currentToken = new Token("");
     }
 
     /**
@@ -677,20 +678,21 @@ public class AST {
      */
     private AST variable_declaration(){
         AST variable_declaration = new AST(new Token("variable-declaration"));
+        Token save = currentToken;
         if(isMatch(currentToken,"static")){
-            variable_declaration.addChild(new Node(currentToken));
+            isStatic = true;
             readToken();
         }
 
         if(isMatch(currentToken,"const")){
-            variable_declaration.addChild(new Node(currentToken));
+            isConst = true;
             readToken();
         }
 
         if(!isMatch(currentToken,"var")) error_message("var", currentToken);
         readToken();
         if(!isMatch(currentToken,"id")) error_message("identifier", currentToken);
-        variable_declaration.addChild(new Node(currentToken));
+
 
         if(isMatch(nextToken,"=")){                      // case: = expression ;
             variable_declaration.addChild(expression());
@@ -890,7 +892,7 @@ public class AST {
      * @param s
      * @return
      */
-    private boolean isMatch(Token token, String s){
+    public static boolean isMatch(Token token, String s){
         if(token == null) return false;
         switch (s){
             case ",": return token instanceof Comma;
@@ -924,6 +926,7 @@ public class AST {
             case ">>": return token.getType().equals(">>");
             case "ref": return token.getType().equals("ref");
             case "const": return token.getType().equals("const");
+            case "function": return token.getType().equals("function");
             case "static": return token.getType().equals("static");
             case "var": return token.getType().equals("var");
             case "basic-type": return token instanceof Number;
@@ -956,7 +959,14 @@ public class AST {
     private void display(AST treeNode, int level){
         if(treeNode != null){
             print(level);
-            System.out.println(treeNode.currentToken);
+            if(treeNode.TYPE != null){
+
+                System.out.println(treeNode.currentToken + "[Kind => " + treeNode.TYPE + "]");
+            }
+            else{
+                System.out.println(treeNode.currentToken);
+            }
+
             for(AST child: treeNode.children){
                 display(child, level + 1);
             }

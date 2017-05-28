@@ -1,4 +1,4 @@
-package com.SemanticAnalyzer;
+package com.SemanticAnalyzer.Util;
 
 import com.LexicalAnalysis.Token;
 
@@ -15,7 +15,7 @@ public class SymbolTable{
         return localScope;
     }
     public ScopeNode pop() {
-        localScope = localScope.getParent();
+        localScope = localScope.getEnclosingScope();
         return localScope;
     }
 
@@ -29,14 +29,13 @@ public class SymbolTable{
     }
 
 
-    public Symbol lookupSymbol(String string) {
+    public Symbol resolve(String string) {
         ScopeNode lookupScope = localScope;
         Symbol value = lookupScope.lookup(string);
         while (value == null) {
-            lookupScope = lookupScope.getParent();
+            lookupScope = lookupScope.getEnclosingScope();
             if (lookupScope == null) {
                 System.err.println("Error (lookup): symbol '" + string + "' not declared.");
-
                 System.exit(1);
                 return null;
             }
