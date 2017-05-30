@@ -17,6 +17,12 @@ public class Symbol {
         this.name = token.getClass().getSimpleName();
     }
 
+    public Symbol(String str,Type t){
+        //this.info = token.getClass().getSimpleName();
+        this.TYPE = t;
+        this.name = str;
+        //this.name = token.getClass().getSimpleName();
+    }
     public Symbol(Token token, Type t){
         this.name = token.getClass().getSimpleName();
         TYPE = t;

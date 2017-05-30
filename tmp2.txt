@@ -82,9 +82,20 @@ function foo1(){
         var n = 2;
     }
 }*/
-//var k = 5 + 2.2;
+var k = 5 + 2.2;
+k = 2;
+//var v = 5;
 function foo1(){
     var n = 9 * 3 / 2.4 - 6;
     var z = 10.9;
+    var p = 3;
 }
-var m = 7;
+function foo2(){
+    var n = 9 * 3 / 2.4 - 6;
+    var z = 10.9;
+    var p = 3;
+}
+var v = 7;
+var l = 4;
+var p = 5;
+

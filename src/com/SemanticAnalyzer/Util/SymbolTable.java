@@ -1,6 +1,9 @@
 package com.SemanticAnalyzer.Util;
 
 import com.LexicalAnalysis.Token;
+import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
+import com.LexicalAnalysis.Type;
+import java.lang.reflect.UndeclaredThrowableException;
 
 /**
  * Created by shayanraouf on 5/19/2017.
@@ -19,6 +22,16 @@ public class SymbolTable{
         return localScope;
     }
 
+
+    public void declareSymbol(String name, Type t) {
+        Symbol symbol = new Symbol(name, t);
+        if (localScope.lookup(symbol.name) != null) {
+            System.err.println("Error: redeclaring symbol " + symbol);
+            System.exit(1);
+        }
+        localScope.define(symbol);
+    }
+
     public void declareSymbol(Token token) {
         Symbol symbol = new Symbol(token);
         if (localScope.lookup(symbol.name) != null) {
@@ -29,15 +42,20 @@ public class SymbolTable{
     }
 
 
-    public Symbol resolve(String string) {
+    public Symbol resolve(String string) throws Exception{
+
         ScopeNode lookupScope = localScope;
         Symbol value = lookupScope.lookup(string);
         while (value == null) {
+
             lookupScope = lookupScope.getEnclosingScope();
             if (lookupScope == null) {
-                System.err.println("Error (lookup): symbol '" + string + "' not declared.");
-                System.exit(1);
-                return null;
+                //throw new UndeclaredThrowableException("Error (lookup): symbol '" + string + "' not declared.")
+                throw new Exception("Error (lookup): symbol '" + string + "' not declared.");
+
+                //System.err.println("Error (lookup): symbol '" + string + "' not declared.");
+//                System.exit(1);
+//                return null;
             }
             value = lookupScope.lookup(string);
         }
