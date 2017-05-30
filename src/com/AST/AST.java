@@ -803,7 +803,7 @@ public class AST {
      */
     private AST expression_statement(){
         ExprNode expression = expression();
-        if(!isMatch(nextToken,";")) error_message(";",nextToken);
+        if(!isMatch(currentToken,";")) error_message(";",currentToken);
         return expression;
     }
 
