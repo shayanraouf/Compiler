@@ -1,6 +1,7 @@
 package com.SemanticAnalyzer;
 
 import com.AST.AST;
+import com.AST.ExprNode;
 import com.LexicalAnalysis.Type;
 import com.SemanticAnalyzer.Util.Symbol;
 import com.SemanticAnalyzer.Util.SymbolTable;
@@ -21,12 +22,51 @@ public class BuildSymbolTable {
     }
 
     public void firstRun(SymbolTable parentScope, AST treeNode){
-        Symbol prevDefined = parentScope.resolve(treeNode.currentToken.getType());
+        //System.out.println(treeNode.currentToken.getType());
+        //Symbol prevDefined = parentScope.resolve(treeNode.currentToken.getType());
 
         for(AST child: treeNode.children){
-            firstPass(child);
+            AST currentNode = child;
+
+            if(AST.isMatch(currentNode.currentToken,"variable-declaration")){
+                try{
+                    System.out.println(currentNode.children.get(0).children.get(0).currentToken.getType());
+                    parentScope.resolve(currentNode.children.get(0).children.get(0).currentToken.getType());
+                    System.err.println("~Britney aint happy aka already defined variable " + currentNode.children.get(0).children.get(0).currentToken.getType());
+                    //now we have a problem
+
+                }catch (Exception e){
+                   String name =  currentNode.children.get(0).children.get(0).currentToken.getType();
+                   Type t =  currentNode.children.get(0).children.get(0).TYPE;
+                   parentScope.declareSymbol(name,t);
+                    //System.out.println(name + " type->" + t);
+                    //System.out.println("an exception was thrown, oops, i did it again ~Britney SPears");
+                }
+
+            }
+            else if(AST.isMatch(currentNode.currentToken,"function")){
+                try{
+                    //System.out.println(currentNode.children.get(0).currentToken.getType());
+                    parentScope.resolve(currentNode.children.get(0).currentToken.getType());
+                    System.err.println("~Britney aint happy aka already defined function " + currentNode.children.get(0).currentToken.getType());
+                    //System.out.println(currentNode.children.get(0).currentToken.getType());
+                    //System.err.println("~Britney aint happy aka already defined variable " + currentNode.children.get(0).children.get(0).currentToken.getType());
+                    //now we have a problem
+
+                }catch (Exception e){
+
+                    String name =  currentNode.children.get(0).currentToken.getType();
+                    Type t =  currentNode.children.get(0).TYPE;
+                    parentScope.declareSymbol(name,t);
+                }
+            }
+
+            //parentScope.resolve(currentNode.currentToken.getType());
+            //System.out.println(currentNode.currentToken.getType());
+            //firstPass(child);
         }
     }
+
 
 
     public void firstPass(){

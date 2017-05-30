@@ -25,8 +25,8 @@ public class Main {
         ast.parse();
         BuildSymbolTable symbolTable = new BuildSymbolTable(ast);
         symbolTable.firstPass();
-
-        ast.display();
+        symbolTable.firstRun();
+        //ast.display();
 
     }
 
