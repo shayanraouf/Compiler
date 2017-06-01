@@ -24,9 +24,8 @@ public class Main {
         AST ast = new AST(lexer);
         ast.parse();
         BuildSymbolTable symbolTable = new BuildSymbolTable(ast);
-        symbolTable.firstPass();
-        symbolTable.firstRun();
-        //ast.display();
+        symbolTable.decorateFirstPass();
+        ast.display();
 
     }
 
