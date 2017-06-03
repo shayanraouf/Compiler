@@ -543,6 +543,7 @@ public class AST {
             Token v = currentToken;
             readToken();
             expr = new Node(v);
+            expr.TYPE = evalType(v);
             return expr;
         }
         else if (isMatch(currentToken, "(")){   // open paren
@@ -571,6 +572,15 @@ public class AST {
             System.out.println("ERROR!");
     }
 
+    private Type evalType(Token t){
+        if(isMatch(t, "id")) return null;
+        if(isMatch(t,"int32")){
+            return Type.INT32;
+        }
+        else{
+            return Type.FLOAT64;
+        }
+    }
 
     private boolean isBinary(){
             return true;

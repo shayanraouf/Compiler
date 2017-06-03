@@ -83,7 +83,7 @@ function foo1(){
     }
 }*/
 var k = 5 + 2.2;
-k = 2;
+k = 4;
 //var v = 5;
 function foo1(){
     var n = 9 * 3 / 2.4 - 6;

@@ -17,6 +17,70 @@ public class BuildSymbolTable {
         this.tree = tree;
     }
 
+    public void decorateFirstPass(){
+        decorateFirstPass(tree);
+    }
+
+    public void decorateFirstPass(AST treeNode){
+        if(treeNode == null) return;
+
+        if(is_assignment(treeNode)){    // = operator?
+            treeNode.children.get(0).TYPE = decorate_assignment(treeNode.children.get(1));
+        }
+
+        for(AST child: treeNode.children){
+            decorateFirstPass(child);
+        }
+    }
+
+    private Type decorate_assignment(AST treeNode){
+        if(isLeaf(treeNode)) return treeNode.TYPE; // check for if Variable
+        Type left = decorate_assignment(treeNode.children.get(0));
+        Type right = decorate_assignment(treeNode.children.get(1));
+        Type final_type = determine_type(left, right);
+        treeNode.TYPE = final_type;
+        return final_type;
+    }
+
+
+    private Type determine_type(Type left,Type right){
+        if(left == Type.FLOAT64 || right == Type.FLOAT64) return Type.FLOAT64;
+        return Type.INT32;
+    }
+
+
+    //precondition: treeNode != null
+    private boolean isLeaf(AST treeNode){
+        return treeNode.children.size() == 0;
+    }
+
+    private boolean is_assignment(AST treeNode){
+        return AST.isMatch(treeNode.currentToken,"=");
+    }
+
+    private boolean is_function(AST treeNode){
+        return AST.isMatch(treeNode.currentToken,"function");
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // -------------------------------------- OLD SHIT ----------------------------------------------------------
     public void firstRun(){
         firstRun(symbolTable,tree);
     }
