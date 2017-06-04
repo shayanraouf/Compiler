@@ -118,6 +118,18 @@ public class AST {
         return null;
     }
 
+    private Type eval_keyword_type(Token t){
+        if(t.getType().equals("int32")){
+            return Type.INT32;
+        }
+        else if(t.getType().equals("float64")){
+            return Type.FLOAT64;
+        }
+
+
+        return null;
+    }
+
     /**
      * parameter ::=
      * refopt constopt identifier non-array-type-descriptor dimension-wildcardsopt
@@ -143,8 +155,10 @@ public class AST {
         }
         // indentifier type-descriptor
         else{
-            param.addChild(new Node(currentToken));
+            Node param_identifier = new Node(currentToken);
+            param.addChild(param_identifier);
             readToken();
+            param_identifier.TYPE = eval_keyword_type(currentToken);
             param.addChild(non_array_type_descriptor());
 
             // if dimension_wildcards
@@ -170,8 +184,8 @@ public class AST {
 
         while(hasNext()){                       // calls parameter() for every comma
              parameters.addChild(parameter());
-            if(isMatch(nextToken,",")){
-                readToken();
+
+            if(isMatch(currentToken,",")){
                 readToken();
             }
             if(isMatch(currentToken,")") || isMatch(nextToken,")")
@@ -235,7 +249,9 @@ public class AST {
         AST function = new AST(currentToken);
 
         readToken();
-        function.addChild(new Node(currentToken)); // save function identifier
+        Node function_identifier = new Node(currentToken);
+        function_identifier.TYPE = Type.FUNCTION;
+        function.addChild(function_identifier); // save function identifier
 
         readToken(); // get next
         if(!isMatch(nextToken,")")){ // we have parameter(s)
@@ -985,6 +1001,10 @@ public class AST {
         }
     }
 
+    public String token_type(){
+        return currentToken.getType();
+    }
+
     public int getNodeType()  { return currentToken.type; }
 
     private void readToken(){
@@ -1005,6 +1025,9 @@ public class AST {
 
     public String toString() { return currentToken.toString(); }
 
+    public AST childAt(int index){
+        return children.get(index);
+    }
 
     public String toStringTree() {
         if ( children==null || children.size()==0 ) return this.toString();

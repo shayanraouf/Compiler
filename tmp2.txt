@@ -82,20 +82,26 @@ function foo1(){
         var n = 2;
     }
 }*/
-var k = 5 + 2.2;
-k = 4;
-//var v = 5;
+var m = 5;
 function foo1(){
-    var n = 9 * 3 / 2.4 - 6;
-    var z = 10.9;
-    var p = 3;
+    //var n = 9 * 3 / 2.4 - 6;
+    m = 9 * 3;
+    var k = 3;
+    function foo(){
+        m = 9 * 3 / 2.4 - 6;
+        //var n = 10.9;
+        var p = 3;
+    }
+    k = 3;
+    /*var x int32;
+    for (x = 0; x < 10; x = x + 1) {
+      print x;
+      print '\t';
+      //var result = fib1(x);
+      //print result;
+      print '\n';
+    }*/
 }
-function foo2(){
-    var n = 9 * 3 / 2.4 - 6;
-    var z = 10.9;
-    var p = 3;
-}
-var v = 7;
-var l = 4;
-var p = 5;
+var n = 2;
+m = 4;
 

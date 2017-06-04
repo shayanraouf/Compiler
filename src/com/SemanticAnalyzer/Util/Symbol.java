@@ -29,6 +29,6 @@ public class Symbol {
     }
 
     public String toString(){
-        return "<" + name + " : " + info + ">";
+        return "<" + name + " : " + TYPE + ">";
     }
 }
