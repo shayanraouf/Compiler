@@ -10,8 +10,8 @@ import java.lang.reflect.UndeclaredThrowableException;
  */
 public class SymbolTable{
 
-    ScopeNode globalScope = new ScopeNode();
-    ScopeNode localScope = globalScope;
+    public ScopeNode globalScope = new ScopeNode();
+    public ScopeNode localScope = globalScope;
 
     public ScopeNode push() {
         localScope = new ScopeNode(localScope);
@@ -20,6 +20,10 @@ public class SymbolTable{
     public ScopeNode pop() {
         localScope = localScope.getEnclosingScope();
         return localScope;
+    }
+
+    public Symbol lookup_local(String str){
+        return localScope.lookup(str);
     }
 
 
@@ -42,20 +46,16 @@ public class SymbolTable{
     }
 
 
-    public Symbol resolve(String string) throws Exception{
+    public Symbol resolve(String string){
 
         ScopeNode lookupScope = localScope;
         Symbol value = lookupScope.lookup(string);
-        while (value == null) {
+        while (value == null) { // while we haven't found the symbol
 
-            lookupScope = lookupScope.getEnclosingScope();
+            lookupScope = lookupScope.getEnclosingScope(); // gets the parent ptr
             if (lookupScope == null) {
-                //throw new UndeclaredThrowableException("Error (lookup): symbol '" + string + "' not declared.")
-                throw new Exception("Error (lookup): symbol '" + string + "' not declared.");
-
-                //System.err.println("Error (lookup): symbol '" + string + "' not declared.");
-//                System.exit(1);
-//                return null;
+                return null;
+                //throw new Exception("Error (lookup): symbol '" + string + "' not declared.");
             }
             value = lookupScope.lookup(string);
         }
