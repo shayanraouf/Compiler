@@ -5,9 +5,6 @@ import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
 import com.LexicalAnalysis.Type;
 import java.lang.reflect.UndeclaredThrowableException;
 
-/**
- * Created by shayanraouf on 5/19/2017.
- */
 public class SymbolTable{
 
     public ScopeNode globalScope = new ScopeNode();
@@ -22,11 +19,6 @@ public class SymbolTable{
         return localScope;
     }
 
-    public Symbol lookup_local(String str){
-        return localScope.lookup(str);
-    }
-
-
     public void declareSymbol(String name, Type t) {
         Symbol symbol = new Symbol(name, t);
         if (localScope.lookup(symbol.name) != null) {
@@ -35,16 +27,6 @@ public class SymbolTable{
         }
         localScope.define(symbol);
     }
-
-    public void declareSymbol(Token token) {
-        Symbol symbol = new Symbol(token);
-        if (localScope.lookup(symbol.name) != null) {
-            System.err.println("Error: redeclaring symbol " + symbol);
-            System.exit(1);
-        }
-        localScope.define(symbol);
-    }
-
 
     public Symbol resolve(String string){
 
@@ -61,6 +43,21 @@ public class SymbolTable{
         }
         return value;
     }
+
+
+    public void declareSymbol(Token token) {
+        Symbol symbol = new Symbol(token);
+        if (localScope.lookup(symbol.name) != null) {
+            System.err.println("Error: redeclaring symbol " + symbol);
+            System.exit(1);
+        }
+        localScope.define(symbol);
+    }
+
+    public Symbol lookup_local(String str){
+        return localScope.lookup(str);
+    }
+
 
 
 //    public void updateSymbol(String symbol, Integer initValue) {
