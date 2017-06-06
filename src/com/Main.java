@@ -10,9 +10,8 @@ import com.AST.AST;
 import com.LexicalAnalysis.Lexer;
 import com.LexicalAnalysis.Token;
 import com.SemanticAnalyzer.BuildSymbolTable;
-
+import com.CodeGeneration.Generate;
 import java.util.Iterator;
-
 
 public class Main {
     public static void main(String[] args){
@@ -26,8 +25,10 @@ public class Main {
         BuildSymbolTable symbolTable = new BuildSymbolTable(ast);
         symbolTable.decorateFirstPass();
         symbolTable.buildTable();
-        ast.display();
+        //ast.display();
 
+        Generate generator = new Generate(ast);
+        generator.firstPass();
     }
 
     public static void run(String in){
