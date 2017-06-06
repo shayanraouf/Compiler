@@ -10,16 +10,14 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import com.SemanticAnalyzer.Util.Symbol;
 
-/**
- * Created by jtryg on 6/4/2017.
- */
 public class Generate
 {
     private AST tree;
     private ArrayList<String> codelines;
     private Path file;
-    private Map<String, String> labelmap;
+    private Map<String, Symbol> labelmap;
     private Map<String, String> operations;
 
     public Generate(AST tree)
@@ -28,7 +26,7 @@ public class Generate
         codelines = new ArrayList<>();
         labelmap = new HashMap<>();
         init_operations();
-        labelmap.put("newline", "int_literal 10");
+        labelmap.put("newline", new Symbol("int_literal 10", "int"));
         file = Paths.get("test.txt");
     }
 
@@ -46,9 +44,10 @@ public class Generate
     private void store_assignment(AST treeNode, String type){
         if (treeNode.children.size() == 0){
             if (is_identifier(treeNode)){
-                codelines.add("load_label " + treeNode.currentToken.getType());
-                type = getType(treeNode);
-                codelines.add("load_mem_" + type);
+                String name = treeNode.currentToken.getType();
+                codelines.add("load_label " + name);
+                String gentype = labelmap.get(name).getGenType();
+                codelines.add("load_mem_" + gentype);
             }
             // TODO - need to handle literal numbers
             return;
@@ -69,6 +68,8 @@ public class Generate
         }
     }
 
+
+
     public void firstPass(){
         for(AST child: tree.children){
             firstPass(child);
@@ -85,6 +86,9 @@ public class Generate
             System.out.println("Error during file write, exiting program");
             System.exit(1);
         }
+
+
+
     }
 
 
@@ -112,7 +116,7 @@ public class Generate
         // store into labelmap
         String key = label;
         String value = getValue(treeNode.childAt(1));
-        labelmap.put(key, value);
+        labelmap.put(label, new Symbol(value, type));
     }
 
 
@@ -125,8 +129,10 @@ public class Generate
         while (it.hasNext())
         {
             Map.Entry pair = (Map.Entry) it.next();
-            codelines.add(pair.getKey() + ":");
-            codelines.add("    " + pair.getValue());
+            Object key = pair.getKey();  // get the key
+            codelines.add(key + ":");
+            Symbol temp = labelmap.get(key);
+            codelines.add("    " + temp.getName());
             it.remove(); // avoids a ConcurrentModificationException
         }
     }

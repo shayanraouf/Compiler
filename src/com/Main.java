@@ -15,10 +15,10 @@ import java.util.Iterator;
 
 public class Main {
     public static void main(String[] args){
-        new Main().run2("tmp2.txt");
+        new Main().run("tmp2.txt");
     }
 
-    public static void run2(String in){
+    public static void run(String in){
         Lexer lexer = new Lexer(in);
         AST ast = new AST(lexer);
         ast.parse();
@@ -29,16 +29,5 @@ public class Main {
 
         Generate generator = new Generate(ast);
         generator.firstPass();
-    }
-
-    public static void run(String in){
-
-        Lexer lexer = new Lexer(in);
-        Iterator<Token> it = lexer.iterator();
-        Token token;
-        while(it.hasNext()){
-            token = it.next();
-            System.out.println(token);
-        }
     }
 }
