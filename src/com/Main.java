@@ -28,11 +28,14 @@ public class Main {
 
         AST ast = new AST(lexer);
         ast.parse();
-//        BuildSymbolTable symbolTable = new BuildSymbolTable(ast);
-//        symbolTable.buildTable();
-        ast.display();
 
-//        Generate generator = new Generate(ast);
-//        generator.firstPass();
+        BuildSymbolTable symbolTable = new BuildSymbolTable(ast);
+//        symbolTable.decorateFirstPass();
+//        symbolTable.decorateFirstPass();
+        symbolTable.buildTable();
+        //ast.display();
+
+        Generate generator = new Generate(ast);
+        generator.GenCode();
     }
 }

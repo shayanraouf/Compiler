@@ -28,6 +28,10 @@ public class SymbolTable{
         localScope.define(symbol);
     }
 
+    public void declareSymbol(Symbol symbol) {
+        localScope.define(symbol);
+    }
+
     public Symbol resolve(String string){
 
         ScopeNode lookupScope = localScope;
