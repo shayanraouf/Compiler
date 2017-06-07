@@ -127,7 +127,13 @@ public class BuildSymbolTable {
             System.err.println("Invalid Casting (" + exp_id + ")");
             System.exit(1);
         }
-        child.childAt(0).TYPE = rightHandSide;
+        if(symbol.TYPE == Type.FLOAT64){
+            child.childAt(0).TYPE = Type.FLOAT64;
+        }
+        else{
+            child.childAt(0).TYPE = rightHandSide;
+        }
+
 
 //        if(child.childAt(0).TYPE == null){
 //

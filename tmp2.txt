@@ -104,9 +104,11 @@ function foo1(){
 }
 var n = 2;
 m = 4;*/
-var k = 5 * 7 + 9 / 3.2;
+/*var k = 5 * 7 + 9 / 3.2;
 var m = 5.9;
 var p = 34;
 var l = k + m * p / k + 3 * k / 9;
 m = 3.4;
-//m = p + p / 2 * 5 * p;
+m = p + p / 2 * 5 * p;*/
+var n float64;
+var x int32;

@@ -28,6 +28,7 @@ public class Main {
 
         AST ast = new AST(lexer);
         ast.parse();
+
         BuildSymbolTable symbolTable = new BuildSymbolTable(ast);
 //        symbolTable.decorateFirstPass();
 //        symbolTable.decorateFirstPass();

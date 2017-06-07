@@ -734,6 +734,7 @@ public class AST {
         readToken();
         if(!isMatch(currentToken,"id")) error_message("identifier", currentToken);
 
+        
 
         if(isMatch(nextToken,"=")){                      // case: = expression ;
             variable_declaration.addChild(expression());
