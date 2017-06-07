@@ -263,8 +263,12 @@ public class AST {
         }
 
         readToken(); // get next
-        if (isMatch(nextToken, "{"))
+        if (isMatch(nextToken, "{")){
+            readToken();
+        }
+        else{
             function.addChild(type_descriptor());
+        }
 
         //readToken(); // get next
 

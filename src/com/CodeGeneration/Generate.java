@@ -3,20 +3,20 @@ package com.CodeGeneration;
 import com.AST.AST;
 import com.LexicalAnalysis.Type;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.nio.file.*;
 import java.nio.charset.*;
 import java.io.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+
 import com.SemanticAnalyzer.Util.Symbol;
 import com.SemanticAnalyzer.Util.SymbolTable;
 
 public class Generate
 {
     private AST tree;
-    private ArrayList<String> codelines;
+    //private Stack<ArrayList> codestack;
+    private ArrayList<String> globalcode;
+    private ArrayList<String> functioncode;
     private Path file;
     private Map<String, Symbol> labelmap;
     private Map<String, String> operations;
@@ -27,8 +27,11 @@ public class Generate
     public Generate(AST tree)
     {
         this.tree = tree;
+        //codestack = new Stack<>();
         symbolTable = new SymbolTable();
-        codelines = new ArrayList<>();
+        globalcode = new ArrayList<>();
+        functioncode = new ArrayList<>();
+        //codestack.push(new ArrayList<String>());
         labelmap = new HashMap<>();
         init_operations();
         file = Paths.get("test.txt");
@@ -45,15 +48,15 @@ public class Generate
 
     public void GenCode(){
         try{
-            labelmap.put("utility", new Symbol("int_literal 0", "int"));
-            GenCode(tree);
-
-            labelmap.put("newline", new Symbol("int_literal 10", "int"));
-            codelines.add("");
-            codelines.add("exit");
-            codelines.add("");
-            addLabels();
-            Files.write(file, codelines, Charset.forName("UTF-8"));
+            GenCode(tree, globalcode);
+            globalcode.add("");
+            globalcode.add("exit");
+            globalcode.add("");
+            addLabels(functioncode);
+            for (String line : functioncode){
+                globalcode.add(line);
+            }
+            Files.write(file, globalcode, Charset.forName("UTF-8"));
         }
         catch(IOException e){
             System.out.println("Error during file write, exiting program");
@@ -61,41 +64,59 @@ public class Generate
         }
     }
 
-    private void GenCode(AST currentNode){
+    private void GenCode(AST currentNode, ArrayList<String> localcode){
         for(AST child: currentNode.children)
         {
             if (child == null) continue;
 
             if (is_assignment(child)){
-                //store_assignment(child.childAt(1), null);
-                //store_assignment(child, null);
-                store_assignment(child);
+                store_assignment(child, localcode);     // m = 3    or   m = m * x * n
             }
             else if (is_variable_declaration(child)){
-                store_declaration(child.childAt(0));
+                store_declaration(child.childAt(0));    // var m = 24;
             }
             else if (is_function_declaration(child)){
-                function_scope(child);
+                function_scope(child, localcode);       // function poo() {}
             }
         }
     }
 
     /*
-        Put the variable declaration into the map
+        Put the function declaration into the map
     */
-    private void function_scope(AST child){
+    private void function_scope(AST treeNode, ArrayList<String> localcode){
 
-        String function_id = child.childAt(0).currentToken.getType();
+        String function_id = treeNode.childAt(0).currentToken.getType();
 
-        Symbol symbol = symbolTable.resolve(function_id);
         symbolTable.declareSymbol(function_id, Type.FUNCTION);
         symbolTable.push();
-        System.out.println("Push");
-        for(AST sub_child: child.children){
-            if(sub_child != null && sub_child.children.size() > 0){
-                GenCode(sub_child);
-            }
 
+        localcode.add("load_label " + function_id);   // load function label and branch
+        localcode.add("branch");
+
+        // new list of codelines for upcoming function scope
+        ArrayList<String> currscope = new ArrayList<>();
+        currscope.add(function_id + ":");
+
+        // cycle through the children of the current function
+        for(AST child: treeNode.children){
+            if(child != null && child.children.size() > 0){
+                GenCode(child, currscope);
+            }
+        }
+
+        // TODO --> returning from function isn't quite working as it should
+        /*
+                Any values calculated after the return aren't working
+                Has to do with Stack pointer (i think)
+         */
+
+        currscope.add("return");  // returning from function
+        functioncode.add("");
+
+        // add the lines gathered from the latest scope to the master function call scope
+        for(String line : currscope){
+            functioncode.add(line);
         }
         symbolTable.pop();
         System.out.println("Pop");
@@ -105,16 +126,16 @@ public class Generate
     /*
        Put the variable declaration into the map
    */
-    private void store_assignment(AST treeNode){
+    private void store_assignment(AST treeNode, ArrayList<String> localcode){
         if (treeNode.children.size() == 0){
-            assignment_leaf(treeNode);      // at leaf node
+            assignment_leaf(treeNode, localcode);      // at leaf node
             return;
         }
 
         String type = getCodeType(treeNode.childAt(0));     // float or int?
 
         if(!treeNode.currentToken.getType().equals("=")){
-            store_assignment(treeNode.childAt(0));    // if not sitting at equals sign, traverse left
+            store_assignment(treeNode.childAt(0), localcode);    // if not sitting at equals sign, traverse left
         }
         else{
             // sitting at equals sign
@@ -124,95 +145,101 @@ public class Generate
             }
         }
 
-        store_assignment(treeNode.childAt(1));        // traverse right
+        store_assignment(treeNode.childAt(1), localcode);        // traverse right
 
         if (treeNode.currentToken.getType().equals("=")){
-            load_equals_sign(treeNode);      // now at top of tree
+            load_equals_sign(treeNode, localcode);      // now at top of tree
         }
         else if (type.equals("int")){    // integer arithmetic
-            integer_load(treeNode);
+            integer_load(treeNode, localcode);
         }
         else{
-            float_load(treeNode);  // float arithmetic
+            float_load(treeNode, localcode);  // float arithmetic
         }
     }
 
 
-    private void assignment_leaf(AST treeNode){
+    private void assignment_leaf(AST treeNode, ArrayList<String> localcode){
         if (is_identifier(treeNode))
         {
             String name = treeNode.currentToken.getType();
-            codelines.add("load_label " + name);
+            localcode.add("load_label " + name);
             String gentype = labelmap.get(name).getGenType();
-            codelines.add("load_mem_" + gentype);
+            localcode.add("load_mem_" + gentype);
         }
         else if (is_number(treeNode)){
             String name = treeNode.currentToken.getType();
-            codelines.add("load_label " + name);
+            localcode.add("load_label " + name);
             if (getEnumType(treeNode) == Type.FLOAT64){
-                codelines.add("store_mem_float");
+                localcode.add("store_mem_float");
             }
             else{
-                codelines.add("store_mem_int");
+                localcode.add("store_mem_int");
             }
         }
     }
 
-    private void load_equals_sign(AST treeNode){
+    private void load_equals_sign(AST treeNode, ArrayList<String> localcode){
         if (treeNode.childAt(0).TYPE == Type.INT32){
-            integer_load(treeNode);
+            integer_load(treeNode, localcode);
         } else{
-            float_load(treeNode);
+            float_load(treeNode, localcode);
         }
     }
 
-    private void integer_load(AST treeNode){
+    private void integer_load(AST treeNode, ArrayList<String> localcode){
         String var = treeNode.childAt(0).currentToken.getType();
         String op = treeNode.currentToken.getType();
         if (op.equals("=")){
-            codelines.add("load_label " + var);
-            codelines.add("store_mem_int");
-            if (verbose){ printInt(var); }
+            localcode.add("load_label " + var);
+            localcode.add("store_mem_int");
+            if (verbose){ printInt(var, localcode); }
         }
         else{
             if(treeNode.childAt(1).TYPE == Type.FLOAT64){
-                codelines.add("to_int");
+                localcode.add("to_int");
             }
-            codelines.add(operations.get(op));
+            localcode.add(operations.get(op));
         }
     }
 
-    private void float_load(AST treeNode){
+    private void float_load(AST treeNode, ArrayList<String> localcode){
         String var = treeNode.childAt(0).currentToken.getType();
         String op = treeNode.currentToken.getType();
         if (op.equals("=")){
-            codelines.add("load_label " + var);
-            codelines.add("store_mem_float");{
-                printFloat(var);
+            localcode.add("load_label " + var);
+            localcode.add("store_mem_float");{
+                printFloat(var, localcode);
             }
         } else
         {
             if (treeNode.childAt(1).TYPE == Type.INT32){
-                codelines.add("to_float");
+                localcode.add("to_float");
             }
-            codelines.add(operations.get(op) + "_f");
+            localcode.add(operations.get(op) + "_f");
         }
     }
 
 
-    private void printInt(String var){
-        codelines.add("");
-        codelines.add("load_label " + var);
-        codelines.add("load_mem_int");
-        codelines.add("print_int");
-        codelines.add("");
+    private void printInt(String var, ArrayList<String> localcode){
+        //localcode.add("");
+        localcode.add("load_label " + var);
+        localcode.add("load_mem_int");
+        localcode.add("print_int");
+        localcode.add("load_label newline");
+        localcode.add("load_mem_int");
+        localcode.add("print_byte");
+        //localcode.add("");
     }
-    private void printFloat(String var){
-        codelines.add("");
-        codelines.add("load_label " + var);
-        codelines.add("load_mem_float");
-        codelines.add("print_float");
-        codelines.add("");
+    private void printFloat(String var, ArrayList<String> localcode){
+        //localcode.add("");
+        localcode.add("load_label " + var);
+        localcode.add("load_mem_float");
+        localcode.add("print_float");
+        localcode.add("load_label newline");
+        localcode.add("load_mem_int");
+        localcode.add("print_byte");
+        //localcode.add("");
     }
 
     /*
@@ -232,16 +259,19 @@ public class Generate
     /*
         Iterate through Map that stores all the labels and write to file
      */
-    private void addLabels()
+    private void addLabels(ArrayList<String> labels)
     {
+        labels.add("");
+        labelmap.put("newline", new Symbol("int_literal 10", "int"));
+
         Iterator it = labelmap.entrySet().iterator();
         while (it.hasNext())
         {
             Map.Entry pair = (Map.Entry) it.next();
             Object key = pair.getKey();  // get the key
-            codelines.add(key + ":");
+            labels.add(key + ":");
             Symbol temp = labelmap.get(key);
-            codelines.add("    " + temp.getName());
+            labels.add("    " + temp.getName());
             it.remove(); // avoids a ConcurrentModificationException
         }
     }
