@@ -68,7 +68,8 @@ public class Generate
 
             if (is_assignment(child)){
                 //store_assignment(child.childAt(1), null);
-                store_assignment(child, null);
+                //store_assignment(child, null);
+                store_assignment(child);
             }
             else if (is_variable_declaration(child)){
                 store_declaration(child.childAt(0));
@@ -104,63 +105,68 @@ public class Generate
     /*
        Put the variable declaration into the map
    */
-    private void store_assignment(AST treeNode, String type){
+    private void store_assignment(AST treeNode){
         if (treeNode.children.size() == 0){
-            if (is_identifier(treeNode))
-            {
-                String name = treeNode.currentToken.getType();
-                codelines.add("load_label " + name);
-                String gentype = labelmap.get(name).getGenType();
-                codelines.add("load_mem_" + gentype);
-            }
-            else if (is_number(treeNode)){
-                String name = treeNode.currentToken.getType();
-                //String name = treeNode
-                codelines.add("load_label " + name);
-                if (getEnumType(treeNode) == Type.FLOAT64){
-                    codelines.add("store_mem_float");
-                }
-                else{
-                    codelines.add("store_mem_int");
-                }
-            }
-            //}
+            assignment_leaf(treeNode);      // at leaf node
             return;
         }
-        //type = getCodeType(treeNode);
 
-        if(!treeNode.currentToken.getType().equals("=")){   // equals sign is special case
-            store_assignment(treeNode.childAt(0), type);    // traverse left
+        String type = getCodeType(treeNode.childAt(0));     // float or int?
+
+        if(!treeNode.currentToken.getType().equals("=")){
+            store_assignment(treeNode.childAt(0));    // if not sitting at equals sign, traverse left
         }
         else{
-            type = getCodeType(treeNode.childAt(0));        // get gencode type of LHS identifier
+            // sitting at equals sign
+            if(treeNode.isMatch(treeNode.childAt(1).currentToken, "basic-type")){  // RHS is number literal?
+                Symbol symbol = symbolTable.resolve(treeNode.childAt(0).currentToken.getType());
+                // TODO --> find out how to put a number literal on the stack
+            }
         }
 
-        store_assignment(treeNode.childAt(1), type);        // traverse right
+        store_assignment(treeNode.childAt(1));        // traverse right
 
         if (treeNode.currentToken.getType().equals("=")){
-            handle_equals_sign(treeNode);
+            load_equals_sign(treeNode);      // now at top of tree
         }
-        else if (type.equals("int")){        // integer arithmetic
-            handle_integer(treeNode);
+        else if (type.equals("int")){    // integer arithmetic
+            integer_load(treeNode);
         }
         else{
-            handle_float(treeNode);  // float arithmetic
+            float_load(treeNode);  // float arithmetic
         }
     }
 
-    public void handle_equals_sign(AST treeNode)
-    {
-        if (treeNode.childAt(0).TYPE == Type.INT32)
+
+    private void assignment_leaf(AST treeNode){
+        if (is_identifier(treeNode))
         {
-            handle_integer(treeNode);
-        } else
-        {
-            handle_float(treeNode);
+            String name = treeNode.currentToken.getType();
+            codelines.add("load_label " + name);
+            String gentype = labelmap.get(name).getGenType();
+            codelines.add("load_mem_" + gentype);
+        }
+        else if (is_number(treeNode)){
+            String name = treeNode.currentToken.getType();
+            codelines.add("load_label " + name);
+            if (getEnumType(treeNode) == Type.FLOAT64){
+                codelines.add("store_mem_float");
+            }
+            else{
+                codelines.add("store_mem_int");
+            }
         }
     }
 
-    public void handle_integer(AST treeNode){
+    private void load_equals_sign(AST treeNode){
+        if (treeNode.childAt(0).TYPE == Type.INT32){
+            integer_load(treeNode);
+        } else{
+            float_load(treeNode);
+        }
+    }
+
+    private void integer_load(AST treeNode){
         String var = treeNode.childAt(0).currentToken.getType();
         String op = treeNode.currentToken.getType();
         if (op.equals("=")){
@@ -169,34 +175,39 @@ public class Generate
             if (verbose){ printInt(var); }
         }
         else{
-            //codelines.add("load_label " + treeNode.currentToken.getType());
+            if(treeNode.childAt(1).TYPE == Type.FLOAT64){
+                codelines.add("to_int");
+            }
             codelines.add(operations.get(op));
         }
     }
 
-    public void handle_float(AST treeNode){
+    private void float_load(AST treeNode){
         String var = treeNode.childAt(0).currentToken.getType();
         String op = treeNode.currentToken.getType();
         if (op.equals("=")){
             codelines.add("load_label " + var);
-            codelines.add("store_mem_float");
-            if (verbose){ printFloat(var); }
-        }
-        else{
-            //codelines.add("load_label " + treeNode.currentToken.getType());
+            codelines.add("store_mem_float");{
+                printFloat(var);
+            }
+        } else
+        {
+            if (treeNode.childAt(1).TYPE == Type.INT32){
+                codelines.add("to_float");
+            }
             codelines.add(operations.get(op) + "_f");
         }
     }
 
 
-    public void printInt(String var){
+    private void printInt(String var){
         codelines.add("");
         codelines.add("load_label " + var);
         codelines.add("load_mem_int");
         codelines.add("print_int");
         codelines.add("");
     }
-    public void printFloat(String var){
+    private void printFloat(String var){
         codelines.add("");
         codelines.add("load_label " + var);
         codelines.add("load_mem_float");
