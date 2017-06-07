@@ -45,6 +45,7 @@ public class Generate
 
     public void GenCode(){
         try{
+            labelmap.put("utility", new Symbol("int_literal 0", "int"));
             GenCode(tree);
 
             labelmap.put("newline", new Symbol("int_literal 10", "int"));
@@ -113,8 +114,8 @@ public class Generate
                 codelines.add("load_mem_" + gentype);
             }
             else if (is_number(treeNode)){
-                //String name = treeNode.currentToken.getType();
-                String name = treeNode
+                String name = treeNode.currentToken.getType();
+                //String name = treeNode
                 codelines.add("load_label " + name);
                 if (getEnumType(treeNode) == Type.FLOAT64){
                     codelines.add("store_mem_float");
@@ -126,24 +127,19 @@ public class Generate
             //}
             return;
         }
-        type = getCodeType(treeNode);
+        //type = getCodeType(treeNode);
 
-        // assembly instructions
-        if(!treeNode.currentToken.getType().equals("=")){
-            store_assignment(treeNode.childAt(0), type);
+        if(!treeNode.currentToken.getType().equals("=")){   // equals sign is special case
+            store_assignment(treeNode.childAt(0), type);    // traverse left
         }
         else{
-            type = getCodeType(treeNode.childAt(0));
+            type = getCodeType(treeNode.childAt(0));        // get gencode type of LHS identifier
         }
-        store_assignment(treeNode.childAt(1), type);
+
+        store_assignment(treeNode.childAt(1), type);        // traverse right
 
         if (treeNode.currentToken.getType().equals("=")){
-            if(treeNode.childAt(0).TYPE == Type.INT32){
-                handle_integer(treeNode);
-            }
-            else{
-                handle_float(treeNode);
-            }
+            handle_equals_sign(treeNode);
         }
         else if (type.equals("int")){        // integer arithmetic
             handle_integer(treeNode);
@@ -153,6 +149,16 @@ public class Generate
         }
     }
 
+    public void handle_equals_sign(AST treeNode)
+    {
+        if (treeNode.childAt(0).TYPE == Type.INT32)
+        {
+            handle_integer(treeNode);
+        } else
+        {
+            handle_float(treeNode);
+        }
+    }
 
     public void handle_integer(AST treeNode){
         String var = treeNode.childAt(0).currentToken.getType();
