@@ -82,7 +82,7 @@ function foo1(){
         var n = 2;
     }
 }*/
-var m = 5;
+/*var m = 5;
 function foo1(){
     //var n = 9 * 3 / 2.4 - 6;
     m = 9 * 3;
@@ -93,15 +93,18 @@ function foo1(){
         var p = 3;
     }
     k = 3;
-    /*var x int32;
+    var x int32;
     for (x = 0; x < 10; x = x + 1) {
       print x;
       print '\t';
       //var result = fib1(x);
       //print result;
       print '\n';
-    }*/
+    }
 }
 var n = 2;
-m = 4;
-
+m = 4;*/
+var k = 5 * 7 + 9 / 3.2;
+var m = 5;
+var l = k + m;
+m = 3.4;

@@ -8,14 +8,14 @@
 package com.LexicalAnalysis;
 
 
-
 import java.io.*;
 import java.util.*;
+
+import com.Util.Intern;
 
 
 public class Lexer implements Iterable<Token>{
     private Set<String> reservedKeyWords;
-    private Map<Integer,String> symbolTable;
     private Reader in;
     private int row, col;
     private char current;
@@ -237,8 +237,12 @@ public class Lexer implements Iterable<Token>{
         Token token;
         if(reservedKeyWords.contains(word)){
             token = new Keyword(sb.toString(),r,c);
-        } else{
-            token = new Identifier(sb.toString(),r,c);
+        } else if(Intern.internTable.get(word) != null){
+            token = Intern.internTable.get(word);
+        }
+        else{
+            token = new Identifier(word,r,c);
+            Intern.internTable.put(word,token);
         }
         clearStringBuilder(sb);
         return token;
@@ -265,7 +269,7 @@ public class Lexer implements Iterable<Token>{
                 }
                 floatSighting = true;
             }
-            
+
             col++;
             sb.append(lookAhead);
         }
@@ -276,7 +280,7 @@ public class Lexer implements Iterable<Token>{
             clearStringBuilder(sb);
             return token;
         }
-        
+
         Token token = new Int32(sb.toString(),r,c);
         clearStringBuilder(sb);
         return token;
@@ -300,7 +304,6 @@ public class Lexer implements Iterable<Token>{
 
     public void initializeMap(){
         reservedKeyWords = new HashSet<>();
-        symbolTable = new HashMap<>();
 
         //Adding all the operators
         reservedKeyWords.add("!");

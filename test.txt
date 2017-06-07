@@ -1,0 +1,11 @@
+
+exit
+
+newline:
+    int_literal 10
+k:
+    float_literal 0
+l:
+    float_literal 0
+m:
+    int_literal 5

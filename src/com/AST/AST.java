@@ -2,6 +2,8 @@ package com.AST;
 import com.LexicalAnalysis.*;
 import com.LexicalAnalysis.Number;
 import com.LexicalAnalysis.Byte;
+import com.Util.Intern;
+
 import java.util.*;
 /**
  * Created by shayanraouf on 5/14/2017.
@@ -9,6 +11,7 @@ import java.util.*;
 
 
 public class AST {
+    Map<String, AST> intern = new HashMap<>();
     public Type TYPE = null;
     public boolean isStatic = false;
     public boolean isConst = false;
@@ -557,9 +560,17 @@ public class AST {
         ExprNode expr;
         if(isMatch(currentToken, "id") || isMatch(currentToken, "basic-type")){   // are we at a terminal?
             Token v = currentToken;
+
+
             readToken();
+
             expr = new Node(v);
             expr.TYPE = evalType(v);
+            if(isMatch(v,"id") && intern.containsKey(v.getType())){
+                return (ExprNode)intern.get(v.getType());
+            }
+
+            intern.put(v.getType(),expr);
             return expr;
         }
         else if (isMatch(currentToken, "(")){   // open paren
