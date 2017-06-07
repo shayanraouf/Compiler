@@ -13,6 +13,8 @@ public class Symbol {
     Token token;
     Scope scope;
     String genType;
+    String codeGenType;
+
 
     public Symbol(Token token){
         this.name = token.getClass().getSimpleName();
@@ -25,13 +27,15 @@ public class Symbol {
         //this.name = token.getClass().getSimpleName();
     }
 
-    public Symbol(String code,String type){
-        //this.info = token.getClass().getSimpleName();
-        this.genType = type;
-        this.name = code;
-        //this.name = token.getClass().getSimpleName();
+    public Symbol(String codeLabel, String codeType, Type t){
+        this.name = codeLabel;
+        this.codeGenType = codeType;
+        TYPE = t;
     }
-
+    public Symbol(String code, String type){
+        this.codeGenType = type;
+        this.name = code;
+    }
     public Symbol(Token token, Type t){
         this.name = token.getClass().getSimpleName();
         TYPE = t;
@@ -42,12 +46,9 @@ public class Symbol {
     }
 
     public String getGenType(){
-        return this.genType;
+        return this.codeGenType;
     }
     public String getName(){
         return this.name;
     }
-
-
-
 }

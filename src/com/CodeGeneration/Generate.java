@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import com.SemanticAnalyzer.Util.Symbol;
+import com.SemanticAnalyzer.Util.SymbolTable;
 
 public class Generate
 {
@@ -19,14 +20,17 @@ public class Generate
     private Path file;
     private Map<String, Symbol> labelmap;
     private Map<String, String> operations;
+    private SymbolTable symbolTable;
+
+    static boolean verbose = true;
 
     public Generate(AST tree)
     {
         this.tree = tree;
+        symbolTable = new SymbolTable();
         codelines = new ArrayList<>();
         labelmap = new HashMap<>();
         init_operations();
-        labelmap.put("newline", new Symbol("int_literal 10", "int"));
         file = Paths.get("test.txt");
     }
 
@@ -36,46 +40,14 @@ public class Generate
         operations.put("-", "sub");
         operations.put("*", "mul");
         operations.put("/", "div");
+        operations.put("=", "store_mem");
     }
 
-    /*
-        Put the variable declaration into the map
-    */
-    private void store_assignment(AST treeNode, String type){
-        if (treeNode.children.size() == 0){
-            if (is_identifier(treeNode)){
-                String name = treeNode.currentToken.getType();
-                codelines.add("load_label " + name);
-                String gentype = labelmap.get(name).getGenType();
-                codelines.add("load_mem_" + gentype);
-            }
-            // TODO - need to handle literal numbers
-            return;
-        }
-
-        type = getType(treeNode);
-
-        // assembly instructions
-        store_assignment(treeNode.childAt(0), type);
-        store_assignment(treeNode.childAt(1), type);
-
-        String op = treeNode.currentToken.getType();
-        if (type.equals("int")){
-            codelines.add(operations.get(op));
-        }
-        else{
-            codelines.add(operations.get(op) + "_f");
-        }
-    }
-
-
-
-    public void firstPass(){
-        for(AST child: tree.children){
-            firstPass(child);
-        }
-
+    public void GenCode(){
         try{
+            GenCode(tree);
+
+            labelmap.put("newline", new Symbol("int_literal 10", "int"));
             codelines.add("");
             codelines.add("exit");
             codelines.add("");
@@ -86,39 +58,159 @@ public class Generate
             System.out.println("Error during file write, exiting program");
             System.exit(1);
         }
+    }
 
+    private void GenCode(AST currentNode){
+        for(AST child: currentNode.children)
+        {
+            if (child == null) continue;
 
+            if (is_assignment(child)){
+                //store_assignment(child.childAt(1), null);
+                store_assignment(child, null);
+            }
+            else if (is_variable_declaration(child)){
+                store_declaration(child.childAt(0));
+            }
+            else if (is_function_declaration(child)){
+                function_scope(child);
+            }
+        }
+    }
 
+    /*
+        Put the variable declaration into the map
+    */
+    private void function_scope(AST child){
+
+        String function_id = child.childAt(0).currentToken.getType();
+
+        Symbol symbol = symbolTable.resolve(function_id);
+        symbolTable.declareSymbol(function_id, Type.FUNCTION);
+        symbolTable.push();
+        System.out.println("Push");
+        for(AST sub_child: child.children){
+            if(sub_child != null && sub_child.children.size() > 0){
+                GenCode(sub_child);
+            }
+
+        }
+        symbolTable.pop();
+        System.out.println("Pop");
     }
 
 
-    private void firstPass(AST treeNode){
-        if(treeNode == null) return;
-
-        if(is_assignment(treeNode)){    // = operator?
-            store_assignment(treeNode.childAt(1), null);
+    /*
+       Put the variable declaration into the map
+   */
+    private void store_assignment(AST treeNode, String type){
+        if (treeNode.children.size() == 0){
+            if (is_identifier(treeNode))
+            {
+                String name = treeNode.currentToken.getType();
+                codelines.add("load_label " + name);
+                String gentype = labelmap.get(name).getGenType();
+                codelines.add("load_mem_" + gentype);
+            }
+            else if (is_number(treeNode)){
+                //String name = treeNode.currentToken.getType();
+                String name = treeNode
+                codelines.add("load_label " + name);
+                if (getEnumType(treeNode) == Type.FLOAT64){
+                    codelines.add("store_mem_float");
+                }
+                else{
+                    codelines.add("store_mem_int");
+                }
+            }
+            //}
+            return;
         }
-        if(is_variable_declaration(treeNode)){    // = operator?
-            store_declaration(treeNode.childAt(0));
+        type = getCodeType(treeNode);
+
+        // assembly instructions
+        if(!treeNode.currentToken.getType().equals("=")){
+            store_assignment(treeNode.childAt(0), type);
+        }
+        else{
+            type = getCodeType(treeNode.childAt(0));
+        }
+        store_assignment(treeNode.childAt(1), type);
+
+        if (treeNode.currentToken.getType().equals("=")){
+            if(treeNode.childAt(0).TYPE == Type.INT32){
+                handle_integer(treeNode);
+            }
+            else{
+                handle_float(treeNode);
+            }
+        }
+        else if (type.equals("int")){        // integer arithmetic
+            handle_integer(treeNode);
+        }
+        else{
+            handle_float(treeNode);  // float arithmetic
         }
     }
 
+
+    public void handle_integer(AST treeNode){
+        String var = treeNode.childAt(0).currentToken.getType();
+        String op = treeNode.currentToken.getType();
+        if (op.equals("=")){
+            codelines.add("load_label " + var);
+            codelines.add("store_mem_int");
+            if (verbose){ printInt(var); }
+        }
+        else{
+            //codelines.add("load_label " + treeNode.currentToken.getType());
+            codelines.add(operations.get(op));
+        }
+    }
+
+    public void handle_float(AST treeNode){
+        String var = treeNode.childAt(0).currentToken.getType();
+        String op = treeNode.currentToken.getType();
+        if (op.equals("=")){
+            codelines.add("load_label " + var);
+            codelines.add("store_mem_float");
+            if (verbose){ printFloat(var); }
+        }
+        else{
+            //codelines.add("load_label " + treeNode.currentToken.getType());
+            codelines.add(operations.get(op) + "_f");
+        }
+    }
+
+
+    public void printInt(String var){
+        codelines.add("");
+        codelines.add("load_label " + var);
+        codelines.add("load_mem_int");
+        codelines.add("print_int");
+        codelines.add("");
+    }
+    public void printFloat(String var){
+        codelines.add("");
+        codelines.add("load_label " + var);
+        codelines.add("load_mem_float");
+        codelines.add("print_float");
+        codelines.add("");
+    }
 
     /*
         Put the variable declaration into the map
     */
     private void store_declaration(AST treeNode){
-        String label = treeNode.childAt(0).currentToken.getType();
-        String type = getType(treeNode.childAt(0));
-        // assembly instructions
+        String codeLabel = treeNode.childAt(0).currentToken.getType();
+        String codeType = getCodeType(treeNode.childAt(0));
+        String codeSnip = getValue(treeNode.childAt(1));
+        //System.out.println(codeLabel +  "  " + codeType + "  " + codeSnip);
 
-
-        // store into labelmap
-        String key = label;
-        String value = getValue(treeNode.childAt(1));
-        labelmap.put(label, new Symbol(value, type));
+        Symbol symbol = new Symbol(codeLabel, codeType, getEnumType(treeNode.childAt(0)));
+        labelmap.put(codeLabel, new Symbol(codeSnip, codeType));   // store as a label
+        symbolTable.declareSymbol(symbol);
     }
-
 
     /*
         Iterate through Map that stores all the labels and write to file
@@ -136,7 +228,6 @@ public class Generate
             it.remove(); // avoids a ConcurrentModificationException
         }
     }
-
 
     /*
         Determine the key that is to be placed in the Map
@@ -174,7 +265,13 @@ public class Generate
         return AST.isMatch(treeNode.currentToken,"variable-declaration");
     }
 
-    private String getType(AST treeNode){
+    private Type getEnumType(AST treeNode){
+        return treeNode.TYPE;
+    }
+
+    private String getCodeType(AST treeNode){
+        if (treeNode.TYPE == null) return null;
+
         if (treeNode.TYPE == Type.FLOAT64){
             return "float";
         }
@@ -188,5 +285,11 @@ public class Generate
     }
     private boolean is_identifier(AST treeNode){
         return AST.isMatch(treeNode.currentToken,"id");
+    }
+    private boolean is_function_declaration(AST treeNode){
+        return AST.isMatch(treeNode.currentToken,"function");
+    }
+    private boolean is_number(AST treeNode){
+        return AST.isMatch(treeNode.currentToken,"basic-type");
     }
 }
