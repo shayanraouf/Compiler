@@ -6,6 +6,6 @@ newline:
 k:
     float_literal 0
 l:
-    float_literal 0
+    0
 m:
     int_literal 5

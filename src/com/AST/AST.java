@@ -566,11 +566,11 @@ public class AST {
 
             expr = new Node(v);
             expr.TYPE = evalType(v);
-            if(isMatch(v,"id") && intern.containsKey(v.getType())){
-                return (ExprNode)intern.get(v.getType());
-            }
-
-            intern.put(v.getType(),expr);
+//            if(isMatch(v,"id") && intern.containsKey(v.getType())){
+//                return (ExprNode)intern.get(v.getType());
+//            }
+//
+//            intern.put(v.getType(),expr);
             return expr;
         }
         else if (isMatch(currentToken, "(")){   // open paren

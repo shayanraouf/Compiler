@@ -2,6 +2,7 @@ package com.SemanticAnalyzer;
 
 import com.AST.AST;
 import com.AST.ExprNode;
+import com.LexicalAnalysis.Number;
 import com.LexicalAnalysis.Type;
 import com.SemanticAnalyzer.Util.ScopeNode;
 import com.SemanticAnalyzer.Util.Symbol;
@@ -11,7 +12,7 @@ import com.SemanticAnalyzer.Util.SymbolTable;
  * Created by shayanraouf on 5/19/2017.
  */
 public class BuildSymbolTable {
-    static boolean flag = true;
+
     AST tree;
     SymbolTable symbolTable = new SymbolTable();
     public BuildSymbolTable(AST tree) {
@@ -27,6 +28,8 @@ public class BuildSymbolTable {
         if(treeNode == null) return;
 
         if(is_assignment(treeNode)){    // = operator?
+//            System.out.println(treeNode.childAt(0).currentToken);
+//            System.out.println(treeNode.childAt(1).currentToken);
             treeNode.children.get(0).TYPE = decorate_assignment(treeNode.children.get(1));
         }
 
@@ -47,6 +50,7 @@ public class BuildSymbolTable {
 
 
     private Type determine_type(Type left,Type right){
+        if(left == null || right == null) return null;
         if(left == Type.FLOAT64 || right == Type.FLOAT64) return Type.FLOAT64;
         return Type.INT32;
     }
@@ -117,6 +121,23 @@ public class BuildSymbolTable {
             System.err.println("Error (lookup): symbol '" + exp_id + "' not declared.");
             System.exit(1);
         }
+        System.out.println(symbol.TYPE);
+        Type rightHandSide = resolveType(child.childAt(1));
+        if(symbol.TYPE == Type.INT32 && rightHandSide == Type.FLOAT64){
+            System.err.println("Invalid Casting (" + exp_id + ")");
+            System.exit(1);
+        }
+        child.childAt(0).TYPE = rightHandSide;
+
+//        if(child.childAt(0).TYPE == null){
+//
+//            child.childAt(0).TYPE = resolveType(child.childAt(1));
+//            if(symbol.TYPE == Type.FLOAT64){
+//
+//                //child.childAt(0).TYPE = Type.FLOAT64;
+//            }
+//        }
+
         //symbolTable.declareSymbol(exp_id,left_enum_type(child));
     }
 
@@ -129,7 +150,6 @@ public class BuildSymbolTable {
         }
         else{ // all good - add to table
             symbolTable.declareSymbol(function_id, left_enum_type(child));
-            //System.out.println(left_child_type(child));
         }
         symbolTable.push();
         System.out.println("Push");
@@ -147,10 +167,32 @@ public class BuildSymbolTable {
 
     private void variable_decl_scope(AST child){
         String variable_id = left_left_child_type(child);
-        //Symbol symbol = symbolTable.resolve(variable_id);
+        child.childAt(0).childAt(0).TYPE = resolveType(child.childAt(0).childAt(1));
+//        if(child.childAt(0).childAt(0).TYPE == null){
+//            child.childAt(0).childAt(0).TYPE = resolveType(child.childAt(0).childAt(1));
+//
+//        }
         symbolTable.declareSymbol(variable_id, left_left_enum_type(child));
     }
 
+    private Type resolveType(AST ast) {
+        if(isLeaf(ast)){
+            if(ast.currentToken instanceof Number){
+                return ast.TYPE;
+            }
+            else{
+                Symbol symbol = symbolTable.resolve(ast.currentToken.getType());
+                ast.TYPE = symbol.TYPE;
+                return ast.TYPE;
+            }
+        }
+
+        Type left = resolveType(ast.children.get(0));
+        Type right = resolveType(ast.children.get(1));
+        Type final_type = determine_type(left, right);
+        ast.TYPE = final_type;
+        return final_type;
+    }
 
 
     // -------------------------------------- OLD SHIT ----------------------------------------------------------
@@ -198,102 +240,4 @@ public class BuildSymbolTable {
         }
     }
 
-
-
-    public void firstPass(){
-        firstPass(tree);
-    }
-
-    private void firstPass(AST treeNode){
-        if(treeNode != null){
-            if(AST.isMatch(treeNode.currentToken,"=")){
-                decorate(treeNode);
-            }
-            else if(AST.isMatch(treeNode.currentToken,"function")){
-                treeNode.children.get(0).TYPE = Type.FUNCTION;
-            }
-            for(AST child: treeNode.children){
-                firstPass(child);
-            }
-        }
-    }
-
-    private void decorate(AST treeNode){
-        setType(treeNode.children.get(0),treeNode, true);
-        flag = true;
-    }
-    private void setType(AST toSet, AST root, Boolean flagg){
-        if(!flag) return;
-        if(root == null) return;
-
-        if(flag && AST.isMatch(root.currentToken,"float64")){
-            toSet.TYPE = Type.FLOAT64;
-            flag = new Boolean(false);
-            return;
-        }
-
-        else if(flag && AST.isMatch(root.currentToken,"int32")){
-            toSet.TYPE = Type.INT32;
-        }
-        if(root.children.size() > 0 && flag){
-
-            setType(toSet, root.children.get(0), flag);
-            if(root.children.size() > 1 && flag){
-                setType(toSet, root.children.get(1), flag);
-            }
-        }
-    }
-
 }
-
-
-/*
-
-
-    public void firstPass(){
-        firstPass(this);
-    }
-
-    private void firstPass(AST treeNode){
-        if(treeNode != null){
-            //System.out.println("first pass " + treeNode.currentToken);
-
-            if(isMatch(treeNode.currentToken,"=")){
-                //System.out.println();
-                decorate(treeNode);
-            }
-            for(AST child: treeNode.children){
-                firstPass(child);
-            }
-        }
-    }
-   static boolean flag = true;
-    private void decorate(AST treeNode){
-        setType(treeNode.children.get(0),treeNode, true);
-    }
-
-    private void setType(AST toSet, AST root, Boolean flagg){
-        if(!flag) return;
-        if(root == null) return;
-
-        if(flag && isMatch(root.currentToken,"float64")){
-            toSet.TYPE = Type.FLOAT64;
-            flag = new Boolean(false);
-            return;
-        }
-
-        else if(flag && isMatch(root.currentToken,"int32")){
-            toSet.TYPE = Type.INT32;
-        }
-        if(root.children.size() > 0 && flag){
-
-            setType(toSet, root.children.get(0), flag);
-            if(root.children.size() > 1 && flag){
-                setType(toSet, root.children.get(1), flag);
-            }
-        }
-    }
-
-
-
- */

@@ -7,7 +7,7 @@ import com.LexicalAnalysis.Type;
  * Created by shayanraouf on 5/19/2017.
  */
 public class Symbol {
-    Type TYPE;
+    public Type TYPE;
     String name;
     String info;
     Token token;
