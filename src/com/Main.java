@@ -36,6 +36,6 @@ public class Main {
           ast.display();
 
          Generate generator = new Generate(ast);
-        generator.GenCode();
+         generator.GenCode();
     }
 }

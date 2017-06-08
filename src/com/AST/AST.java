@@ -999,6 +999,8 @@ public class AST {
             case "function": return token.getType().equals("function");
 
             case "variable-declaration": return token.getType().equals("variable-declaration");
+            case "function-call": return token.getType().equals("function-call");
+            case "print-statement": return token.getType().equals("print-statement");
             case "static": return token.getType().equals("static");
             case "var": return token.getType().equals("var");
             case "basic-type": return token instanceof Number;

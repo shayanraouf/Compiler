@@ -81,8 +81,32 @@ public class Generate
             else if (is_function_declaration(child)){
                 function_scope(child, localcode);       // function poo() {}
             }
+            else if(is_function_call(child)){
+                function_call(child,localcode);
+
+            }
+            else if(is_print_statement(child)){
+                System.err.print("if(is_print_statement(child))");
+                print_statement(child,localcode);
+
+            }
+
+
         }
     }
+
+    private boolean is_print_statement(AST treeNode){
+        return AST.isMatch(treeNode.currentToken,"print-statement");
+    }
+
+    private void function_call(AST treeNode,ArrayList<String> localcode){
+
+        String function_id = treeNode.childAt(0).currentToken.getType();
+        localcode.add("load_label " + function_id);
+        localcode.add("call");
+    }
+
+
 
     /*
         Put the function declaration into the map
@@ -94,8 +118,8 @@ public class Generate
         symbolTable.declareSymbol(function_id, Type.FUNCTION);
         symbolTable.push();
 
-        localcode.add("load_label " + function_id);   // load function label and branch
-        localcode.add("branch");
+        //localcode.add("load_label " + function_id);   // load function label and branch
+        //localcode.add("branch");
 
         // new list of codelines for upcoming function scope
         ArrayList<String> currscope = new ArrayList<>();
@@ -229,7 +253,7 @@ public class Generate
         if (op.equals("=")){
             localcode.add("load_label " + var);
             localcode.add("store_mem_int");
-            if (verbose){ printInt(var, localcode); }
+            //if (verbose){ printInt(var, localcode); }
         }
         else{
             if(treeNode.childAt(1).TYPE == Type.FLOAT64){
@@ -245,7 +269,6 @@ public class Generate
         if (op.equals("=")){
             localcode.add("load_label " + var);
             localcode.add("store_mem_float");{
-                printFloat(var, localcode);
             }
         } else
         {
@@ -253,6 +276,16 @@ public class Generate
                 localcode.add("to_float");
             }
             localcode.add(operations.get(op) + "_f");
+        }
+    }
+
+    private void print_statement(AST treeNode, ArrayList<String> localcode){
+        System.err.println(treeNode.childAt(0).TYPE);
+        if(treeNode.childAt(0).TYPE == Type.FLOAT64){
+            printFloat(treeNode.childAt(0).currentToken.getType(),localcode);
+        }
+        else{
+            printInt(treeNode.childAt(0).currentToken.getType(),localcode);
         }
     }
 
@@ -358,6 +391,9 @@ public class Generate
     }
     private boolean is_function_declaration(AST treeNode){
         return AST.isMatch(treeNode.currentToken,"function");
+    }
+    private boolean is_function_call(AST treeNode){
+        return AST.isMatch(treeNode.currentToken,"function-call");
     }
     private boolean is_number(AST treeNode){
         return AST.isMatch(treeNode.currentToken,"basic-type");

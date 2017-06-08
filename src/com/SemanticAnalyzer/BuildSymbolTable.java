@@ -69,6 +69,9 @@ public class BuildSymbolTable {
         return AST.isMatch(treeNode.currentToken,"function");
     }
 
+    private boolean is_print_statement(AST treeNode){
+        return AST.isMatch(treeNode.currentToken,"print-statement");
+    }
 
     private boolean is_variable_declaration(AST treeNode){
         return AST.isMatch(treeNode.currentToken,"variable-declaration");
@@ -111,7 +114,20 @@ public class BuildSymbolTable {
                 System.out.println("assignment_operator (init)");
                 init(child);
             }
+            else if(is_print_statement(child)){
+                call_print(child);
+            }
         }
+    }
+
+    private void call_print(AST child) {
+        String exp_id = left_child_type(child);
+        Symbol symbol = symbolTable.resolve(exp_id);
+        if(symbol == null){
+            System.err.println("Error (lookup): symbol '" + exp_id + "' not declared.");
+            System.exit(1);
+        }
+        resolveType(child.childAt(0));
     }
 
     private void init(AST child){
