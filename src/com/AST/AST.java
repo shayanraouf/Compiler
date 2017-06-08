@@ -734,9 +734,29 @@ public class AST {
         readToken();
         if(!isMatch(currentToken,"id")) error_message("identifier", currentToken);
 
-        
-
-        if(isMatch(nextToken,"=")){                      // case: = expression ;
+        if(is_float64(nextToken)){
+            AST assignment = new Node(new Operator("=",-1,-1));
+            AST identifier = new Node(currentToken);
+            identifier.TYPE = Type.FLOAT64;
+            AST num = new Node(new Float64("0",-1,-1));
+            num.TYPE = Type.FLOAT64;
+            assignment.addChild(identifier);
+            assignment.addChild(num);
+            variable_declaration.addChild(assignment);
+            readToken();
+        }
+        else if(is_int32(nextToken)){
+            AST assignment = new Node(new Operator("=",-1,-1));
+            AST identifier = new Node(currentToken);
+            identifier.TYPE = Type.INT32;
+            AST num = new Node(new Int32("0",-1,-1));
+            num.TYPE = Type.INT32;
+            assignment.addChild(identifier);
+            assignment.addChild(num);
+            variable_declaration.addChild(assignment);
+            readToken();
+        }
+        else if(isMatch(nextToken,"=")){                      // case: = expression ;
             variable_declaration.addChild(expression());
         }
         else {                                              // case: type-descriptor ;
@@ -745,6 +765,14 @@ public class AST {
         }
 
         return variable_declaration;
+    }
+
+    private boolean is_float64(Token t){
+        return t.getType().equals("float64");
+    }
+
+    private boolean is_int32(Token t){
+        return t.getType().equals("int32");
     }
 
     /**

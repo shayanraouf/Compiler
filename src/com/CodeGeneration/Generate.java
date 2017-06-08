@@ -1,6 +1,7 @@
 package com.CodeGeneration;
 
 import com.AST.AST;
+import com.LexicalAnalysis.Number;
 import com.LexicalAnalysis.Type;
 
 import java.util.*;
@@ -20,8 +21,9 @@ public class Generate
     private Path file;
     private Map<String, Symbol> labelmap;
     private Map<String, String> operations;
+    //private Map<String, >
     private SymbolTable symbolTable;
-
+    int num = 0;
     static boolean verbose = true;
 
     public Generate(AST tree)
@@ -50,6 +52,7 @@ public class Generate
         try{
             GenCode(tree, globalcode);
             globalcode.add("");
+            globalcode.add("load0");
             globalcode.add("exit");
             globalcode.add("");
             addLabels(functioncode);
@@ -73,7 +76,7 @@ public class Generate
                 store_assignment(child, localcode);     // m = 3    or   m = m * x * n
             }
             else if (is_variable_declaration(child)){
-                store_declaration(child.childAt(0));    // var m = 24;
+                store_declaration(child.childAt(0),localcode);    // var m = 24;
             }
             else if (is_function_declaration(child)){
                 function_scope(child, localcode);       // function poo() {}
@@ -122,6 +125,28 @@ public class Generate
         System.out.println("Pop");
     }
 
+    /*
+    Put the variable declaration into the map
+*/
+    private void store_declaration(AST treeNode, ArrayList<String> localcode){
+        String codeLabel = treeNode.childAt(0).currentToken.getType();
+        //System.err.println(codeLabel);
+        String codeType = getCodeType(treeNode.childAt(0));
+
+        String codeSnip = getValue(treeNode.childAt(1));
+        //System.out.println(codeLabel +  "  " + codeType + "  " + codeSnip);
+
+        Symbol symbol = new Symbol(codeLabel, codeType, getEnumType(treeNode.childAt(0)));
+        labelmap.put(codeLabel, new Symbol(codeSnip, codeType));   // store as a label
+        symbolTable.declareSymbol(symbol);
+        if(treeNode.childAt(1).children.size() > 1){
+            store_assignment(treeNode,localcode);
+            //System.err.println(treeNode.childAt(1).children.size());
+        }
+
+    }
+
+
 
     /*
        Put the variable declaration into the map
@@ -142,7 +167,9 @@ public class Generate
             if(treeNode.isMatch(treeNode.childAt(1).currentToken, "basic-type")){  // RHS is number literal?
                 Symbol symbol = symbolTable.resolve(treeNode.childAt(0).currentToken.getType());
                 // TODO --> find out how to put a number literal on the stack
+
             }
+
         }
 
         store_assignment(treeNode.childAt(1), localcode);        // traverse right
@@ -168,15 +195,24 @@ public class Generate
             localcode.add("load_mem_" + gentype);
         }
         else if (is_number(treeNode)){
-            String name = treeNode.currentToken.getType();
-            localcode.add("load_label " + name);
+            System.err.println(treeNode.currentToken);
+
+            String codeLabel = generateLiteralLabel();
+            Symbol symbol = new Symbol(getValue(treeNode),getCodeType(treeNode));
+            labelmap.put(codeLabel,symbol);
+            localcode.add("load_label " + codeLabel);
             if (getEnumType(treeNode) == Type.FLOAT64){
-                localcode.add("store_mem_float");
+                localcode.add("load_mem_float");
             }
             else{
-                localcode.add("store_mem_int");
+                localcode.add("load_mem_int");
             }
         }
+
+    }
+
+    private String generateLiteralLabel() {
+        return "LL" + num++;
     }
 
     private void load_equals_sign(AST treeNode, ArrayList<String> localcode){
@@ -242,19 +278,6 @@ public class Generate
         //localcode.add("");
     }
 
-    /*
-        Put the variable declaration into the map
-    */
-    private void store_declaration(AST treeNode){
-        String codeLabel = treeNode.childAt(0).currentToken.getType();
-        String codeType = getCodeType(treeNode.childAt(0));
-        String codeSnip = getValue(treeNode.childAt(1));
-        //System.out.println(codeLabel +  "  " + codeType + "  " + codeSnip);
-
-        Symbol symbol = new Symbol(codeLabel, codeType, getEnumType(treeNode.childAt(0)));
-        labelmap.put(codeLabel, new Symbol(codeSnip, codeType));   // store as a label
-        symbolTable.declareSymbol(symbol);
-    }
 
     /*
         Iterate through Map that stores all the labels and write to file

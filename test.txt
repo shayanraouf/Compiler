@@ -1,11 +1,38 @@
+load_label m
+load_mem_int
+load_label n
+load_mem_int
+add
+load_label x
+store_mem_int
+load_label x
+load_mem_int
+print_int
+load_label newline
+load_mem_int
+print_byte
+load_label LL0
+load_mem_int
+load_label x
+store_mem_int
+load_label x
+load_mem_int
+print_int
+load_label newline
+load_mem_int
+print_byte
 
+load0
 exit
 
+
+LL0:
+    int_literal 55
 newline:
     int_literal 10
-k:
-    float_literal 0
-l:
-    0
+x:
+    int_literal 0
 m:
-    int_literal 5
+    int_literal 34
+n:
+    int_literal 100

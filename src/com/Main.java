@@ -32,10 +32,10 @@ public class Main {
         BuildSymbolTable symbolTable = new BuildSymbolTable(ast);
 //        symbolTable.decorateFirstPass();
 //        symbolTable.decorateFirstPass();
-        symbolTable.buildTable();
-        //ast.display();
+          symbolTable.buildTable();
+          ast.display();
 
-        Generate generator = new Generate(ast);
+         Generate generator = new Generate(ast);
         generator.GenCode();
     }
 }
