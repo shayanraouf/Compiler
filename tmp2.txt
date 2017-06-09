@@ -17,7 +17,7 @@ function foo(n int32){
     foo2();
     print x;
 }
-foo(5,6);
+foo(5);
 print x;
 print p;
 /*var poop = 4;

@@ -87,7 +87,6 @@ public class Generate
 
             }
             else if(is_print_statement(child)){
-                System.err.print("if(is_print_statement(child))");
                 print_statement(child,localcode);
 
             }
@@ -169,7 +168,7 @@ public class Generate
             }
 
 
-            if(is_identifier(child)){
+            if(AST.isMatch(child.currentToken,"=")){
                 store_declaration(child,localcode);
             }
 
@@ -183,11 +182,10 @@ public class Generate
 */
     private void store_declaration(AST treeNode, ArrayList<String> localcode){
         String codeLabel = treeNode.childAt(0).currentToken.getType();
-        //System.err.println(codeLabel);
         String codeType = getCodeType(treeNode.childAt(0));
 
         String codeSnip = getValue(treeNode.childAt(1));
-        //System.out.println(codeLabel +  "  " + codeType + "  " + codeSnip);
+
 
         Symbol symbol = new Symbol(codeLabel, codeType, getEnumType(treeNode.childAt(0)));
 
@@ -195,7 +193,6 @@ public class Generate
         //labelmap.containsKey(codeLabel
 
         if(labelmap.containsKey(codeLabel)){
-            //System.err.println("ppppppppppppppppppppppppppppppppppppppppp");
             unique_codeLabel = gen_unique(codeLabel);
             symbol.alias = unique_codeLabel;
             symbolTable.declareSymbol(symbol);
@@ -206,11 +203,9 @@ public class Generate
             labelmap.put(codeLabel, new Symbol(codeSnip, codeType));   // store as a label
             symbolTable.declareSymbol(symbol);
         }
-        System.err.println("+++++++++++++++++++++ " + symbol.alias);
 
         if(treeNode.childAt(1).children.size() > 1){
             store_assignment(treeNode,localcode);
-            //System.err.println(treeNode.childAt(1).children.size());
         }
 
     }
@@ -468,6 +463,11 @@ public class Generate
         else{
             return "int";
         }
+    }
+    //expression(s)
+
+    private boolean has_expressions(AST treeNode){
+        return AST.isMatch(treeNode.currentToken,"expression(s)");
     }
     private boolean is_block_statement(AST treeNode){
         return AST.isMatch(treeNode.currentToken,"block-statement");

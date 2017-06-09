@@ -1022,6 +1022,8 @@ public class AST {
             case "const": return token.getType().equals("const");
             case "function": return token.getType().equals("function");
 
+
+            case "expression(s)": return token.getType().equals("expression(s)");
             case "block-statement": return token.getType().equals("block-statement");
             case "variable-declaration": return token.getType().equals("variable-declaration");
             case "function-call": return token.getType().equals("function-call");
