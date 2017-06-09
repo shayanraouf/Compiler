@@ -35,7 +35,7 @@ public class Main {
 //        symbolTable.decorateFirstPass();
 //        symbolTable.decorateFirstPass();
           symbolTable.buildTable();
-          //ast.display();
+          ast.display();
 
          Generate generator = new Generate(ast);
          generator.GenCode();

@@ -158,11 +158,35 @@ public class AST {
         }
         // indentifier type-descriptor
         else{
-            Node param_identifier = new Node(currentToken);
-            param.addChild(param_identifier);
+            AST param_identifier = new Node(currentToken);
+            //param.addChild(param_identifier);
             readToken();
-            param_identifier.TYPE = eval_keyword_type(currentToken);
-            param.addChild(non_array_type_descriptor());
+            //param_identifier.TYPE = eval_keyword_type(currentToken);
+
+            if(is_float64(currentToken)){
+                AST assignment = new Node(new Operator("=",-1,-1));
+                AST num = new Node(new Float64("0",-1,-1));
+                num.TYPE = Type.FLOAT64;
+                param_identifier.TYPE = Type.FLOAT64;
+                assignment.addChild(param_identifier);
+                assignment.addChild(num);
+                param.addChild(assignment);
+                //readToken();
+            }
+            else if(is_int32(currentToken)){
+                AST assignment = new Node(new Operator("=",-1,-1));
+                AST num = new Node(new Int32("0",-1,-1));
+                num.TYPE = Type.INT32;
+                param_identifier.TYPE = Type.INT32;
+                assignment.addChild(param_identifier);
+                assignment.addChild(num);
+                param.addChild(assignment);
+                //readToken();
+            }
+
+
+
+            //param.addChild(non_array_type_descriptor());
 
             // if dimension_wildcards
             if(isMatch(nextToken, "[")){

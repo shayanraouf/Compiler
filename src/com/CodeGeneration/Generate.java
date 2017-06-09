@@ -124,13 +124,13 @@ public class Generate
         for(AST child: treeNode.children){
             if(child != null && child.children.size() > 0){
 
-//                if(is_parameters(child)){
-//                    handle_params(child, currscope);
-//                }
+                if(is_parameters(child)){
+                    handle_params(child, currscope);
+                }
 
-                //if(is_block_statement(child)){
+                if(is_block_statement(child)){
                     GenCode(child, currscope);
-                //}
+                }
 
 
             }
@@ -170,7 +170,7 @@ public class Generate
 
 
             if(is_identifier(child)){
-                assignment_leaf(child,localcode);
+                store_declaration(child,localcode);
             }
 
 

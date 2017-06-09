@@ -98,8 +98,6 @@ return
 
 m:
     int_literal 5
-n:
-    float_literal 10.5
 LL1:
     float_literal 87.8
 p:
