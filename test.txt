@@ -35,6 +35,10 @@ print_float
 load_label newline
 load_mem_int
 print_byte
+load_label LL9
+load_mem_int
+load_label n
+store_mem_int
 load_label foo
 call
 load_label x
@@ -124,6 +128,8 @@ x:
     float_literal 0
 x0:
     float_literal 3.5
+LL9:
+    int_literal 5
 x1:
     float_literal 5.5
 LL8:

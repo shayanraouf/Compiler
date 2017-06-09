@@ -102,6 +102,28 @@ public class Generate
     private void function_call(AST treeNode,ArrayList<String> localcode){
 
         String function_id = treeNode.childAt(0).currentToken.getType();
+        Symbol symbol = symbolTable.resolve(function_id);
+        if(symbol.function_param_ids.size() > 0){ // we have arguments
+            int i = 0;
+            for(AST child: treeNode.childAt(1).children){
+                String codeSnip = getValue(child);
+                String label = generateLiteralLabel();
+                labelmap.put(label, new Symbol(codeSnip,child.TYPE));
+                globalcode.add("load_label " + label);
+                globalcode.add("load_mem_" + getCodeType(child));
+
+                globalcode.add("load_label " + symbol.function_param_ids.get(i++));
+                globalcode.add("store_mem_" + getCodeType(child));
+
+
+                System.err.println("ddddddddddddddddddddddddd " + child.TYPE);
+            }
+
+        }
+
+        //System.err.println("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr" + ""
+                //if(has_expressions())
+        //System.err.println("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr" +symbol.function_param_ids.size());
         localcode.add("load_label " + function_id);
         localcode.add("call");
     }
@@ -115,7 +137,9 @@ public class Generate
 
         String function_id = treeNode.childAt(0).currentToken.getType();
 
-        symbolTable.declareSymbol(function_id, Type.FUNCTION);
+        Symbol function_symbol = new Symbol(function_id, Type.FUNCTION);
+
+        symbolTable.declareSymbol(function_symbol);
         symbolTable.push();
         ArrayList<String> currscope = new ArrayList<>();
         currscope.add(function_id + ":");
@@ -124,7 +148,7 @@ public class Generate
             if(child != null && child.children.size() > 0){
 
                 if(is_parameters(child)){
-                    handle_params(child, currscope);
+                    handle_params(child, currscope,function_symbol);
                 }
 
                 if(is_block_statement(child)){
@@ -147,16 +171,16 @@ public class Generate
     }
 
 
-    private void handle_params(AST treeNode, ArrayList<String> localcode){
+    private void handle_params(AST treeNode, ArrayList<String> localcode, Symbol function_symbol){
         //System.err.println("--------------------" + treeNode.children.size());
 
         for(AST child: treeNode.children){
             //System.err.println(child.currentToken + " handle_params");
-            handle_parameter(child, localcode);
+            handle_parameter(child, localcode, function_symbol);
         }
     }
 
-    private void handle_parameter(AST treeNode, ArrayList<String> localcode){
+    private void handle_parameter(AST treeNode, ArrayList<String> localcode, Symbol function_symbol){
         for(AST child: treeNode.children){
 
             if(AST.isMatch(child.currentToken,"const")){
@@ -169,11 +193,17 @@ public class Generate
 
 
             if(AST.isMatch(child.currentToken,"=")){
+                //System.err.println("My Last Day " + child.currentToken.getType());
+                String param_id = child.childAt(0).currentToken.getType();
+                Symbol param_symbol = new Symbol(param_id,getCodeType(child),child.TYPE,param_id);
+                symbolTable.declareSymbol(param_symbol);
+                function_symbol.function_param_ids.add(param_id);
+                //System.err.println("My Last Day " + param_id);
                 store_declaration(child,localcode);
             }
 
 
-            System.err.println(child.currentToken + " handle_param_singular");
+            //System.err.println(child.currentToken + " handle_param_singular");
             //handle_parameter(child.childAt(0), localcode);
         }
     }

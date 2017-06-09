@@ -6,6 +6,7 @@ print x;
 print p;
 function foo(n int32){
     print n;
+    //print m;
     x = x + 1;
     var x = 3.5;
     print x;
