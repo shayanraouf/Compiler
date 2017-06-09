@@ -8,6 +8,7 @@ import com.LexicalAnalysis.Type;
  */
 public class Symbol {
     public Type TYPE;
+    public String alias;
     String name;
     String info;
     Token token;
@@ -31,6 +32,14 @@ public class Symbol {
         this.name = codeLabel;
         this.codeGenType = codeType;
         TYPE = t;
+        this.alias = codeLabel;
+    }
+
+    public Symbol(String codeLabel, String codeType, Type t, String alias){
+        this.name = codeLabel;
+        this.codeGenType = codeType;
+        TYPE = t;
+        this.alias = alias;
     }
     public Symbol(String code, String type){
         this.codeGenType = type;

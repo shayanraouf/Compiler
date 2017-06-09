@@ -16,6 +16,8 @@ import java.util.Iterator;
 public class Main {
     public static void main(String[] args){
         new Main().run("tmp2.txt");
+        double p = 10 / 5 + 4 / 5.5 + 10.7;
+        System.err.println(p);
     }
 
     public static void run(String in){
@@ -33,7 +35,7 @@ public class Main {
 //        symbolTable.decorateFirstPass();
 //        symbolTable.decorateFirstPass();
           symbolTable.buildTable();
-          ast.display();
+          //ast.display();
 
          Generate generator = new Generate(ast);
          generator.GenCode();

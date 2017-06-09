@@ -1,23 +1,3 @@
-load_label LL0
-load_mem_float
-load_label LL1
-load_mem_float
-add_f
-load_label x
-store_mem_float
-load_label LL2
-load_mem_int
-load_label LL3
-load_mem_int
-load_label m
-load_mem_int
-div
-load_label n
-load_mem_int
-mul
-add
-load_label p
-store_mem_int
 load_label x
 load_mem_float
 print_float
@@ -26,9 +6,9 @@ load_mem_int
 print_byte
 load_label foo
 call
-load_label p
-load_mem_int
-print_int
+load_label x
+load_mem_float
+print_float
 load_label newline
 load_mem_int
 print_byte
@@ -38,11 +18,7 @@ exit
 
 
 foo2:
-load_label LL5
-load_mem_float
-load_label x
-store_mem_float
-load_label x
+load_label x1
 load_mem_float
 print_float
 load_label newline
@@ -51,11 +27,7 @@ print_byte
 return
 
 foo:
-load_label LL4
-load_mem_float
-load_label x
-store_mem_float
-load_label x
+load_label x0
 load_mem_float
 print_float
 load_label newline
@@ -63,27 +35,23 @@ load_mem_int
 print_byte
 load_label foo2
 call
+load_label x0
+load_mem_float
+print_float
+load_label newline
+load_mem_int
+print_byte
 return
 
-LL1:
-    float_literal 87.8
-p:
-    int_literal 0
-LL0:
-    float_literal 56.5
-LL3:
-    int_literal 20
 newline:
     int_literal 10
-LL2:
-    int_literal 2
-LL5:
-    float_literal 5.5
-LL4:
-    float_literal 3.5
 x:
-    float_literal 0
+    float_literal 56.5
+x0:
+    float_literal 3.5
+x1:
+    float_literal 5.5
 m:
     int_literal 5
 n:
-    int_literal 10
+    float_literal 10.5

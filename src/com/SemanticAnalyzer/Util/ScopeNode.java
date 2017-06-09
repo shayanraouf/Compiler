@@ -9,8 +9,8 @@ import java.util.Scanner;
  */
 public class ScopeNode{
 
-    ScopeNode parentPtr = null;
-    Map<String, Symbol> table = new HashMap<>();
+    public ScopeNode parentPtr = null;
+    public Map<String, Symbol> table = new HashMap<>();
 
     public ScopeNode(){
         this.parentPtr = null;

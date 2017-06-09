@@ -1,0 +1,43 @@
+load_label LL0
+load_mem_int
+load_label LL1
+load_mem_int
+div
+to_float
+load_label LL2
+load_mem_int
+to_float
+load_label LL3
+load_mem_float
+div_f
+add_f
+load_label LL4
+load_mem_float
+add_f
+load_label p
+store_mem_float
+load_label p
+load_mem_float
+print_float
+load_label newline
+load_mem_int
+print_byte
+
+load0
+exit
+
+
+p:
+    float_literal 0
+LL1:
+    int_literal 5
+LL0:
+    int_literal 10
+LL3:
+    float_literal 5.5
+newline:
+    int_literal 10
+LL2:
+    int_literal 4
+LL4:
+    float_literal 10.5

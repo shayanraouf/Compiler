@@ -1,18 +1,23 @@
 var m = 5;
-var n = 10;
-var x = 56.5 + 87.8;
-var p = 2 + 20 / m * n;
+var n = 10.5;
+//var x = 56.5 + 87.8;
+//var p = 10 / 5 + 4 / 5.5 + 10.7;
+var x = 56.5;
 print x;
 function foo(){
-    x = 3.5;
+
+    var x = 3.5;
     print x;
     function foo2(){
-        x = 5.5;
+        var x = 5.5;
         print x;
     }
     foo2();
+    print x;
 }
 foo();
-print p;
+print x;
 /*var poop = 4;
-poop = 3 * 3;*/
+print poop;
+poop = 3 * 3;
+print poop;*/

@@ -998,9 +998,12 @@ public class AST {
             case "const": return token.getType().equals("const");
             case "function": return token.getType().equals("function");
 
+            case "block-statement": return token.getType().equals("block-statement");
             case "variable-declaration": return token.getType().equals("variable-declaration");
             case "function-call": return token.getType().equals("function-call");
             case "print-statement": return token.getType().equals("print-statement");
+            case "parameter(s)": return token.getType().equals("parameter(s)");
+            case "parameter": return token.getType().equals("parameter");
             case "static": return token.getType().equals("static");
             case "var": return token.getType().equals("var");
             case "basic-type": return token instanceof Number;
