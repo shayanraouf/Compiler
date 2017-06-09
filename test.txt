@@ -1,4 +1,35 @@
+load_label LL0
+load_mem_float
+load_label LL1
+load_mem_float
+add_f
 load_label x
+store_mem_float
+load_label LL2
+load_mem_int
+load_label LL3
+load_mem_int
+div
+to_float
+load_label LL4
+load_mem_int
+to_float
+load_label LL5
+load_mem_float
+div_f
+add_f
+load_label LL6
+load_mem_float
+add_f
+load_label p
+store_mem_float
+load_label x
+load_mem_float
+print_float
+load_label newline
+load_mem_int
+print_byte
+load_label p
 load_mem_float
 print_float
 load_label newline
@@ -12,12 +43,26 @@ print_float
 load_label newline
 load_mem_int
 print_byte
+load_label p
+load_mem_float
+print_float
+load_label newline
+load_mem_int
+print_byte
 
 load0
 exit
 
 
 foo2:
+load_label p
+load_mem_float
+load_label LL8
+load_mem_int
+to_float
+mul_f
+load_label p
+store_mem_float
 load_label x1
 load_mem_float
 print_float
@@ -27,6 +72,14 @@ print_byte
 return
 
 foo:
+load_label x
+load_mem_float
+load_label LL7
+load_mem_int
+to_float
+add_f
+load_label x
+store_mem_float
 load_label x0
 load_mem_float
 print_float
@@ -43,15 +96,35 @@ load_mem_int
 print_byte
 return
 
-newline:
-    int_literal 10
-x:
-    float_literal 56.5
-x0:
-    float_literal 3.5
-x1:
-    float_literal 5.5
 m:
     int_literal 5
 n:
     float_literal 10.5
+LL1:
+    float_literal 87.8
+p:
+    float_literal 0
+LL0:
+    float_literal 56.5
+LL3:
+    int_literal 5
+newline:
+    int_literal 10
+LL2:
+    int_literal 10
+LL5:
+    float_literal 5.5
+LL4:
+    int_literal 4
+LL7:
+    int_literal 1
+LL6:
+    float_literal 10.7
+x:
+    float_literal 0
+x0:
+    float_literal 3.5
+x1:
+    float_literal 5.5
+LL8:
+    int_literal 2

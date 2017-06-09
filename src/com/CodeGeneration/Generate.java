@@ -286,7 +286,8 @@ public class Generate
         if (is_identifier(treeNode))
         {
             String name = treeNode.currentToken.getType();
-            localcode.add("load_label " + name);
+            Symbol symbol = symbolTable.resolve(name);
+            localcode.add("load_label " + symbol.alias);
             String gentype = labelmap.get(name).getGenType();
             localcode.add("load_mem_" + gentype);
         }
