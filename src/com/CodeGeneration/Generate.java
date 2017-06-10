@@ -1,7 +1,12 @@
-package com.CodeGeneration;
+/*
+  Compiler
+  Authors: Shayan Raouf & Josh Trygg
+  CSS 448 - Compilers - Bernstein
+  Generate.java
+ */
 
+package com.CodeGeneration;
 import com.AST.AST;
-import com.LexicalAnalysis.Number;
 import com.LexicalAnalysis.Type;
 
 import java.util.*;
@@ -15,26 +20,21 @@ import com.SemanticAnalyzer.Util.SymbolTable;
 public class Generate
 {
     private AST tree;
-    //private Stack<ArrayList> codestack;
     private ArrayList<String> globalcode;
     private ArrayList<String> functioncode;
     private Path file;
     private Map<String, Symbol> labelmap;
     private Map<String, String> operations;
-    //private Map<String, >
     private SymbolTable symbolTable;
     int num = 0;
     int num2 = 0;
-    static boolean verbose = true;
 
     public Generate(AST tree)
     {
         this.tree = tree;
-        //codestack = new Stack<>();
         symbolTable = new SymbolTable();
         globalcode = new ArrayList<>();
         functioncode = new ArrayList<>();
-        //codestack.push(new ArrayList<String>());
         labelmap = new HashMap<>();
         init_operations();
         file = Paths.get("test.txt");
@@ -80,18 +80,14 @@ public class Generate
                 store_declaration(child.childAt(0),localcode);    // var m = 24;
             }
             else if (is_function_declaration(child)){
-                function_scope(child, localcode);       // function poo() {}
+                function_scope(child, localcode);       // function foo() {}
             }
             else if(is_function_call(child)){
-                function_call(child,localcode);
-
+                function_call(child,localcode);         // foo();
             }
             else if(is_print_statement(child)){
-                print_statement(child,localcode);
-
+                print_statement(child,localcode);       // print 24;
             }
-
-
         }
     }
 
@@ -114,16 +110,9 @@ public class Generate
 
                 globalcode.add("load_label " + symbol.function_param_ids.get(i++));
                 globalcode.add("store_mem_" + getCodeType(child));
-
-
-                System.err.println("ddddddddddddddddddddddddd " + child.TYPE);
             }
 
         }
-
-        //System.err.println("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr" + ""
-                //if(has_expressions())
-        //System.err.println("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr" +symbol.function_param_ids.size());
         localcode.add("load_label " + function_id);
         localcode.add("call");
     }
@@ -172,10 +161,8 @@ public class Generate
 
 
     private void handle_params(AST treeNode, ArrayList<String> localcode, Symbol function_symbol){
-        //System.err.println("--------------------" + treeNode.children.size());
 
         for(AST child: treeNode.children){
-            //System.err.println(child.currentToken + " handle_params");
             handle_parameter(child, localcode, function_symbol);
         }
     }
@@ -191,25 +178,19 @@ public class Generate
 
             }
 
-
             if(AST.isMatch(child.currentToken,"=")){
-                //System.err.println("My Last Day " + child.currentToken.getType());
                 String param_id = child.childAt(0).currentToken.getType();
                 Symbol param_symbol = new Symbol(param_id,getCodeType(child),child.TYPE,param_id);
                 symbolTable.declareSymbol(param_symbol);
                 function_symbol.function_param_ids.add(param_id);
-                //System.err.println("My Last Day " + param_id);
                 store_declaration(child,localcode);
             }
-
-
-            //System.err.println(child.currentToken + " handle_param_singular");
-            //handle_parameter(child.childAt(0), localcode);
         }
     }
+
     /*
-    Put the variable declaration into the map
-*/
+        Put the variable declaration into the map
+    */
     private void store_declaration(AST treeNode, ArrayList<String> localcode){
         String codeLabel = treeNode.childAt(0).currentToken.getType();
         String codeType = getCodeType(treeNode.childAt(0));
@@ -220,7 +201,6 @@ public class Generate
         Symbol symbol = new Symbol(codeLabel, codeType, getEnumType(treeNode.childAt(0)));
 
         String unique_codeLabel = "";
-        //labelmap.containsKey(codeLabel
 
         if(labelmap.containsKey(codeLabel)){
             unique_codeLabel = gen_unique(codeLabel);
@@ -250,42 +230,8 @@ public class Generate
        Put the variable declaration into the map
    */
     private void store_assignment(AST treeNode, ArrayList<String> localcode){
-        /*if (treeNode.children.size() == 0){
-            assignment_leaf(treeNode, localcode);      // at leaf node
-            return;
-        }
-
-        String type = getCodeType(treeNode.childAt(0));     // float or int?
-
-        if(!treeNode.currentToken.getType().equals("=")){
-            store_assignment(treeNode.childAt(0), localcode);    // if not sitting at equals sign, traverse left
-        }
-        else{
-            // sitting at equals sign
-            if(treeNode.isMatch(treeNode.childAt(1).currentToken, "basic-type")){  // RHS is number literal?
-                Symbol symbol = symbolTable.resolve(treeNode.childAt(0).currentToken.getType());
-                // TODO --> find out how to put a number literal on the stack
-
-            }
-
-        }
-
-
-
-        store_assignment(treeNode.childAt(1), localcode);        // traverse right
-
-        if (treeNode.currentToken.getType().equals("=")){
-            load_equals_sign(treeNode, localcode);      // now at top of tree
-        }
-        else if (type.equals("int")){    // integer arithmetic
-            integer_load(treeNode, localcode);
-        }
-        else{
-            float_load(treeNode, localcode);  // float arithmetic
-        }*/
         store_assignment2(treeNode.childAt(1),localcode);
         load_equals_sign(treeNode, localcode);
-
     }
 
     private AST store_assignment2(AST treeNode, ArrayList<String> localcode){
@@ -317,7 +263,6 @@ public class Generate
             localcode.add("load_mem_" + gentype);
         }
         else if (is_number(treeNode)){
-            System.err.println(treeNode.currentToken);
 
             String codeLabel = generateLiteralLabel();
             Symbol symbol = new Symbol(getValue(treeNode),getCodeType(treeNode));
@@ -361,7 +306,6 @@ public class Generate
         if (op.equals("=")){
             localcode.add("load_label " + var);
             localcode.add("store_mem_int");
-            //if (verbose){ printInt(var, localcode); }
         }
         else{
             if(treeNode.childAt(1).TYPE == Type.FLOAT64){
@@ -388,11 +332,8 @@ public class Generate
     }
 
     private void print_statement(AST treeNode, ArrayList<String> localcode){
-        //System.err.println(treeNode.childAt(0).TYPE);
         String id = treeNode.childAt(0).currentToken.getType();
-        //System.err.println("--------------------- " + id);
         Symbol symbol = symbolTable.resolve(id);
-        //System.err.println("--------------------- " + symbol.alias);
         if(treeNode.childAt(0).TYPE == Type.FLOAT64){
             printFloat(symbol.alias,localcode);
         }
@@ -403,24 +344,20 @@ public class Generate
 
 
     private void printInt(String var, ArrayList<String> localcode){
-        //localcode.add("");
         localcode.add("load_label " + var);
         localcode.add("load_mem_int");
         localcode.add("print_int");
         localcode.add("load_label newline");
         localcode.add("load_mem_int");
         localcode.add("print_byte");
-        //localcode.add("");
     }
     private void printFloat(String var, ArrayList<String> localcode){
-        //localcode.add("");
         localcode.add("load_label " + var);
         localcode.add("load_mem_float");
         localcode.add("print_float");
         localcode.add("load_label newline");
         localcode.add("load_mem_int");
         localcode.add("print_byte");
-        //localcode.add("");
     }
 
 
@@ -444,13 +381,6 @@ public class Generate
         }
     }
 
-    /*
-        Determine the key that is to be placed in the Map
-     */
-    private String getKey(AST treeNode){
-
-        return null;
-    }
 
     /*
         Determine the value that is to be placed in the Map
@@ -494,11 +424,7 @@ public class Generate
             return "int";
         }
     }
-    //expression(s)
 
-    private boolean has_expressions(AST treeNode){
-        return AST.isMatch(treeNode.currentToken,"expression(s)");
-    }
     private boolean is_block_statement(AST treeNode){
         return AST.isMatch(treeNode.currentToken,"block-statement");
     }

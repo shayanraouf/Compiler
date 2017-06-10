@@ -1,9 +1,13 @@
+/*
+  Compiler
+  Authors: Shayan Raouf & Josh Trygg
+  CSS 448 - Compilers - Bernstein
+  ExprNode.java
+ */
+
 package com.AST;
 import com.LexicalAnalysis.Token;
 
-/**
- * Created by shayanraouf on 5/14/2017.
- */
 public abstract class ExprNode extends AST {
 
     public static final int tINVALID = 0; // invalid expression type

@@ -1,10 +1,14 @@
+/*
+  Compiler
+  Authors: Shayan Raouf & Josh Trygg
+  CSS 448 - Compilers - Bernstein
+  IntNode.java
+ */
+
 package com.AST;
 
 import com.LexicalAnalysis.Token;
 
-/**
- * Created by shayanraouf on 5/14/2017.
- */
 public class IntNode extends ExprNode {
     public IntNode(Token t) {
         super(t);

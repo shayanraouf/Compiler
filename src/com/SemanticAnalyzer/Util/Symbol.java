@@ -1,3 +1,10 @@
+/*
+  Compiler
+  Authors: Shayan Raouf & Josh Trygg
+  CSS 448 - Compilers - Bernstein
+  Symbol.java
+ */
+
 package com.SemanticAnalyzer.Util;
 
 import com.LexicalAnalysis.Token;
@@ -6,16 +13,10 @@ import com.LexicalAnalysis.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by shayanraouf on 5/19/2017.
- */
 public class Symbol {
     public Type TYPE;
     public String alias;
     String name;
-    String info;
-    Token token;
-    Scope scope;
     String genType;
     String codeGenType;
     public List<String> function_param_ids = new ArrayList<>();
@@ -25,10 +26,8 @@ public class Symbol {
     }
 
     public Symbol(String str,Type t){
-        //this.info = token.getClass().getSimpleName();
         this.TYPE = t;
         this.name = str;
-        //this.name = token.getClass().getSimpleName();
     }
 
     public Symbol(String codeLabel, String codeType, Type t){

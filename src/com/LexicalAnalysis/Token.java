@@ -2,17 +2,13 @@
   Lexical Analyzer
   Authors: Shayan Raouf & Josh Trygg
   CSS 448 - Compilers - Bernstein
-  Lexer.java
+  Token.java
  */
 
 package com.LexicalAnalysis;
 
 
 public class Token {
-    public static final int INVALID_TOKEN_TYPE = 0;
-    public static final int PLUS = 1; // token types
-    public static final int INT = 2;
-
 
     protected int row,col;
     protected String text;
@@ -36,13 +32,6 @@ public class Token {
     public Token(String text){
         this.text = text;
     }
-    public int getRow(){
-        return row;
-    }
-
-    public int getCol(){
-        return col;
-    }
     public String getType(){
         return text;
     }
@@ -57,7 +46,5 @@ public class Token {
         else{
             return "[" + row + "," + col + "]";
         }
-
     }
-
 }

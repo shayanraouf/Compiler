@@ -1,39 +1,28 @@
 /*
-  Lexical Analyzer
+  Compiler
   Authors: Shayan Raouf & Josh Trygg
   CSS 448 - Compilers - Bernstein
-  Lexer.java
+  Main.java
  */
 
 package com;
 import com.AST.AST;
 import com.LexicalAnalysis.Lexer;
-import com.LexicalAnalysis.Token;
 import com.SemanticAnalyzer.BuildSymbolTable;
 import com.CodeGeneration.Generate;
-import java.util.Iterator;
 
 public class Main {
     public static void main(String[] args){
         new Main().run("tmp2.txt");
-        double p = 10 / 5 + 4 / 5.5 + 10.7;
-        System.err.println(p);
     }
 
     public static void run(String in){
         Lexer lexer = new Lexer(in);
-//        Iterator<Token> it = lexer.iterator();
-//        while(it.hasNext()){
-//            Token t = it.next();
-//            System.out.println(t + " " + System.identityHashCode(t));
-//        }
 
         AST ast = new AST(lexer);
         ast.parse();
 
         BuildSymbolTable symbolTable = new BuildSymbolTable(ast);
-//        symbolTable.decorateFirstPass();
-//        symbolTable.decorateFirstPass();
           symbolTable.buildTable();
           ast.display();
 

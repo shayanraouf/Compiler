@@ -1,11 +1,14 @@
-package com.AST;
+/*
+  Compiler
+  Authors: Shayan Raouf & Josh Trygg
+  CSS 448 - Compilers - Bernstein
+  AddNode.java
+ */
 
-import com.AST.ExprNode;
+package com.AST;
 import com.LexicalAnalysis.Token;
 
-/**
- * Created by shayanraouf on 5/14/2017.
- */
+
 public class AddNode extends ExprNode {
 
     public AddNode(ExprNode left, Token addToken, ExprNode right) {

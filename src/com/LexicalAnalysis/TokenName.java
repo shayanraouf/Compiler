@@ -2,8 +2,9 @@
   Lexical Analyzer
   Authors: Shayan Raouf & Josh Trygg
   CSS 448 - Compilers - Bernstein
-  Lexer.java
+  TokenName.java
  */
+
 package com.LexicalAnalysis;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +45,6 @@ public class TokenName {
         put("parameter(s)","parameter(s)");
         put("parameter","parameter");
         put("else-statement","else-statement");
-
         put("expression(s)","expression(s)");
         put("dimension","dimension");
         put("variable-declaration","variable-declaration");
@@ -59,7 +59,5 @@ public class TokenName {
         put("function-call","function-call");
         put("return-statement","return-statement");
         put("print-statement","print-statement");
-
-
     }};
 }

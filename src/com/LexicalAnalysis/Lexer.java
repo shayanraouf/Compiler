@@ -178,8 +178,6 @@ public class Lexer implements Iterable<Token>{
 
                 default:
                      break;
-                     // TODO: 3/30/2017
-                     // handle error
             }
         return null;
     }
@@ -286,9 +284,6 @@ public class Lexer implements Iterable<Token>{
         return token;
     }
 
-
-
-
     private void clearStringBuilder(StringBuilder sb){
         sb.setLength(0);
     }
@@ -312,22 +307,17 @@ public class Lexer implements Iterable<Token>{
         reservedKeyWords.add("/");
         reservedKeyWords.add("+");
         reservedKeyWords.add("-");
-
         reservedKeyWords.add("&");
         reservedKeyWords.add("|");
         reservedKeyWords.add("^");
-
         reservedKeyWords.add(">");
         reservedKeyWords.add("<");
         reservedKeyWords.add(">=");
         reservedKeyWords.add("<=");
         reservedKeyWords.add("==");
         reservedKeyWords.add("!=");
-
-
         reservedKeyWords.add("for");
         reservedKeyWords.add("this");
-
         reservedKeyWords.add("byte");
         reservedKeyWords.add("const");
         reservedKeyWords.add("else");

@@ -1,17 +1,19 @@
+/*
+  Compiler
+  Authors: Shayan Raouf & Josh Trygg
+  CSS 448 - Compilers - Bernstein
+  AST.java
+ */
+
 package com.AST;
 import com.LexicalAnalysis.*;
 import com.LexicalAnalysis.Number;
 import com.LexicalAnalysis.Byte;
-import com.Util.Intern;
 
 import java.util.*;
-/**
- * Created by shayanraouf on 5/14/2017.
- */
 
 
 public class AST {
-    Map<String, AST> intern = new HashMap<>();
     public Type TYPE = null;
     public boolean isStatic = false;
     public boolean isConst = false;
@@ -159,9 +161,7 @@ public class AST {
         // indentifier type-descriptor
         else{
             AST param_identifier = new Node(currentToken);
-            //param.addChild(param_identifier);
             readToken();
-            //param_identifier.TYPE = eval_keyword_type(currentToken);
 
             if(is_float64(currentToken)){
                 AST assignment = new Node(new Operator("=",-1,-1));
@@ -183,10 +183,6 @@ public class AST {
                 param.addChild(assignment);
                 //readToken();
             }
-
-
-
-            //param.addChild(non_array_type_descriptor());
 
             // if dimension_wildcards
             if(isMatch(nextToken, "[")){
@@ -293,9 +289,6 @@ public class AST {
         else{
             function.addChild(type_descriptor());
         }
-
-        //readToken(); // get next
-
 
         readToken(); // get next
         stack.push('{');
@@ -572,18 +565,7 @@ public class AST {
         }
         return expr;
     }
-/*    private ExprNode casting(){   // handle casting
-        ExprNode expr;
-        expr = basement();
-        while (currentToken.getType().equals("int32")
-                || currentToken.getType().equals("byte")
-                || currentToken.getType().equals("float64")){
-                Token cast = currentToken;
-                ExprNode expr1 = (ExprNode)casting_declaration();
-                expr = new AddNode(expr, cast, expr1);
-        }
-        return expr;
-    }*/
+
     private ExprNode basement(){
         ExprNode expr;
         if(isMatch(currentToken, "id") || isMatch(currentToken, "basic-type")){   // are we at a terminal?
@@ -594,11 +576,6 @@ public class AST {
 
             expr = new Node(v);
             expr.TYPE = evalType(v);
-//            if(isMatch(v,"id") && intern.containsKey(v.getType())){
-//                return (ExprNode)intern.get(v.getType());
-//            }
-//
-//            intern.put(v.getType(),expr);
             return expr;
         }
         else if (isMatch(currentToken, "(")){   // open paren
@@ -637,14 +614,8 @@ public class AST {
         }
     }
 
-    private boolean isBinary(){
-            return true;
-    }
     private boolean isUnary(Token tok){
         return false;
-    }
-    private int precedence(){
-        return precedenceMap.get(currentToken.getType());
     }
 /*
     --------------- End Expression section -----------------------------------------------------
@@ -827,7 +798,6 @@ public class AST {
         AST field_declaration = new AST(new Token("field-declaration"));
         field_declaration.addChild(new Node(currentToken)); // add identifier
 
-        //if(!isMatch(currentToken,"id")) error_message("identifier", currentToken);
         readToken();
         field_declaration.addChild(type_descriptor());
         return field_declaration;
@@ -842,7 +812,6 @@ public class AST {
         AST record_descriptor = new AST(new Token("record-descriptor"));
         readToken();
         record_descriptor.addChild(field_declarations());
-        //if(!isMatch(currentToken,"end"))error_message("end", currentToken);
         record_descriptor.addChild(new Node(currentToken));
         return record_descriptor;
     }
@@ -967,15 +936,6 @@ public class AST {
 
     }
 
-    /**
-     *  number ::= character-literal | integer-literal | float-literal
-     * @return
-     */
-    private AST number(){
-        return null;
-    }
-
-
     private void error_message(String expected, Token found){
         System.err.println("Expected: " + expected + " Found" + found);
     }
@@ -1080,8 +1040,6 @@ public class AST {
         return currentToken.getType();
     }
 
-    public int getNodeType()  { return currentToken.type; }
-
     private void readToken(){
         currentToken = nextToken;
         nextToken = iterator.next();
@@ -1095,8 +1053,6 @@ public class AST {
         if ( children==null ) children = new ArrayList<AST>();
         children.add(t);
     }
-    public boolean isNil()    { return currentToken==null; }
-
 
     public String toString() { return currentToken.toString(); }
 
@@ -1104,20 +1060,4 @@ public class AST {
         return children.get(index);
     }
 
-    public String toStringTree() {
-        if ( children==null || children.size()==0 ) return this.toString();
-        StringBuilder buf = new StringBuilder();
-        if ( !isNil() ) {
-            buf.append("(");
-            buf.append(this.toString());
-            buf.append(' ');
-        }
-        for (int i = 0; children!=null && i < children.size(); i++) {
-            AST t = (AST)children.get(i);
-            if ( i>0 ) buf.append(' ');
-            buf.append(t.toStringTree());
-        }
-        if ( !isNil() ) buf.append(")");
-        return buf.toString();
-    }
 }
